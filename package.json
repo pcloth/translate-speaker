@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者",
     "description": "",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -65,6 +65,11 @@
                     "default": 34,
                     "description": "超过这个长度就不朗读了。"
                 },
+                "translateSpeaker.origin": {
+                    "type": "string",
+                    "default": "cn",
+                    "description": "访问google翻译站点后缀"
+                },
                 "translateSpeaker.debug": {
                     "type": "boolean",
                     "default": false,
@@ -85,8 +90,7 @@
         "@types/mocha": "^2.2.42"
     },
     "dependencies": {
-        "@vitalets/google-translate-api": "^2.7.0",
-        "google-translate-api-cn": "^1.0.1",
+        "google-translate-cn-api": "^1.0.5",
         "say": "^0.13.1"
     }
 }

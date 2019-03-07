@@ -36,6 +36,18 @@
 
   // 选定单词发声
   "translateSpeaker.voiceSelection": true
-
+  
+  // 访问google翻译站点后缀
+  "translateSpeaker.origin": "cn" （ "com" or "hk"）
+/**
+ * 通过domain 参数修改翻译网址，默认值为cn
+ * com => https://translate.google.com
+ * cn => https://translate.google.cn
+ * hk => https://translate.google.hk
+ */
+ 
+  // 开启调试模式
+  "translateSpeaker.debug": false,
+                    
 
 

@@ -17,10 +17,13 @@ const cfgTranslateEnabled = () => vscode.workspace.getConfiguration('translateSp
 const cfgTranslateTimeout = () => vscode.workspace.getConfiguration('translateSpeaker').get('translateTimeout');
 const cfgWordMaxLength = () => vscode.workspace.getConfiguration('translateSpeaker').get('wordMaxLength');
 const cfgDebug = () => vscode.workspace.getConfiguration('translateSpeaker').get('debug');
-const translate = require('@vitalets/google-translate-api');
-// const translate = require('google-translate-api-cn');
+const cfgOrigin = () => vscode.workspace.getConfiguration('translateSpeaker').get('origin');
+
+const translate = require('google-translate-cn-api');
 
 let edited = false // 是否刚结束编辑状态
+
+let origin = cfgOrigin();
 
 function isChinese(text) {
     return /[\u4E00-\u9FA5\uF900-\uFA2D]/.test(text)
@@ -31,15 +34,12 @@ function getTranslate(text) {
         vscode.window.setStatusBarMessage(text, cfgTranslateTimeout())
         return
     }
-    console.log(text, '-----');
     translate(text, {
         to: 'zh-cn',
-        client: 't'
+        domain: origin
     }).then(res => {
-        console.log(22);
         vscode.window.setStatusBarMessage(`${text} | ${res.text}`, cfgTranslateTimeout())
     }).catch(err => {
-        console.log(33);
         let errinfo = '--translate time out--';
         if (cfgDebug()) {
             errinfo = JSON.stringify(err);
