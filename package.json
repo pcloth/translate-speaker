@@ -1,0 +1,92 @@
+{
+    "name": "translate-speaker",
+    "displayName": "translate speaker 翻译朗读者",
+    "description": "",
+    "version": "0.0.7",
+    "publisher": "pcloth",
+    "icon": "assert/logo.png",
+    "engines": {
+        "vscode": "^1.16.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/pcloth/translate-speaker.git"
+    },
+    "main": "./extension",
+    "contributes": {
+        "hoverProvider": "true",
+        "configuration": {
+            "type": "object",
+            "title": "Word Voice configuration",
+            "properties": {
+                "translateSpeaker.disableAll": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "禁用全部功能"
+                },
+                "translateSpeaker.voiceFilename": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "切换文件时发声"
+                },
+                "translateSpeaker.voiceEditing": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "输入单词时发声"
+                },
+                "translateSpeaker.voiceCursor": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "移动光标时发声"
+                },
+                "translateSpeaker.voiceSelection": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "选定单词发声"
+                },
+                "translateSpeaker.translateEnabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "允许在状态栏显示翻译。"
+                },
+                "translateSpeaker.translateTimeout": {
+                    "type": "number",
+                    "default": 8000,
+                    "description": "翻译显示时间"
+                },
+                "translateSpeaker.wordMaxLength": {
+                    "type": "number",
+                    "default": 34,
+                    "description": "超过这个长度就不朗读了。"
+                },
+                "translateSpeaker.debug": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "开启调试模式"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.6",
+        "eslint": "^4.11.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "@vitalets/google-translate-api": "^2.7.0",
+        "google-translate-api-cn": "^1.0.1",
+        "say": "^0.13.1"
+    }
+}
