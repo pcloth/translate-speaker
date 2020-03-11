@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者",
     "description": "",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -91,6 +91,10 @@
     },
     "dependencies": {
         "google-translate-cn-api": "^1.0.5",
-        "say": "^0.13.1"
+        "say": "^0.13.1",
+        "typescript": "^2.6.1",
+        "eslint": "^4.11.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
     }
 }

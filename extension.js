@@ -20,6 +20,7 @@ const cfgDebug = () => vscode.workspace.getConfiguration('translateSpeaker').get
 const cfgOrigin = () => vscode.workspace.getConfiguration('translateSpeaker').get('origin');
 
 const translate = require('google-translate-cn-api');
+// const translate = require('./lib/google');
 
 let edited = false // 是否刚结束编辑状态
 
