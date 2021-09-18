@@ -2,11 +2,11 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者",
     "description": "",
-    "version": "0.0.9",
+    "version": "1.0.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
-        "vscode": "^1.16.0"
+        "vscode": "^1.50.0"
     },
     "categories": [
         "Other"
@@ -47,7 +47,32 @@
             "type": "object",
             "title": "translate 设置",
             "properties": {
-                
+                "translateSpeaker.enable": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "启用功能"
+                },
+                "translateSpeaker.enableSpeak": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "启用朗读"
+                },
+                "translateSpeaker.apiType": {
+                    "type": "string",
+                    "default": "baidu",
+                    "enum": ["baidu"],
+                    "description": ["百度翻译API"]
+                },
+                "translateSpeaker.appId": {
+                    "type": "string",
+                    "default": "",
+                    "description": "翻译API的账号，通常是appid"
+                },
+                "translateSpeaker.password": {
+                    "type": "string",
+                    "default": "",
+                    "description": "翻译API的账号密钥，通常是指password或者appSecret"
+                }
             }
 
         }
