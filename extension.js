@@ -19,37 +19,80 @@ const cfgWordMaxLength = () => vscode.workspace.getConfiguration('translateSpeak
 const cfgDebug = () => vscode.workspace.getConfiguration('translateSpeaker').get('debug');
 const cfgOrigin = () => vscode.workspace.getConfiguration('translateSpeaker').get('origin');
 
-const translate = require('google-translate-cn-api');
+// const translate = require('google-translate-cn-api');
+
+const baiduTranslateApi = require('./lib/baiduapi.js');
+
 // const translate = require('./lib/google');
+const md5 = require('./lib/md5.js');
+
+// 获取配置参数
+const getConfigValue = function (name) {
+    return vscode.workspace.getConfiguration('translateSpeaker').get(name);
+}
+
+const appid = '20180606000172773'
+const salt = 't)rans(late_Spe&ak$e!r#'
+const q = 'hello'
+const password = '_i2M0ux3_7rfZfSzj7BA'
+
+let sign = md5.hex_md5(`${appid}${q}${salt}${password}`)
+
 
 let edited = false // 是否刚结束编辑状态
 
 let origin = cfgOrigin();
 
+// 检测是否中文
 function isChinese(text) {
     return /[\u4E00-\u9FA5\uF900-\uFA2D]/.test(text)
 }
 
-function getTranslate(text) {
-    if (isChinese(text)) {
-        vscode.window.setStatusBarMessage(text, cfgTranslateTimeout())
-        return
-    }
-    translate(text, {
-        to: 'zh-cn',
-        domain: origin
-    }).then(res => {
-        vscode.window.setStatusBarMessage(`${text} | ${res.text}`, cfgTranslateTimeout())
-    }).catch(err => {
-        let errinfo = '--translate time out--';
-        if (cfgDebug()) {
-            errinfo = JSON.stringify(err);
-        }
-        vscode.window.setStatusBarMessage(`${text} | ${errinfo}`, cfgTranslateTimeout())
-    });
+function getTranslate(text, from = 'auto', to = 'zh') {
+    console.log(text,from,to,'>>>>')
+    baiduTranslateApi(text, from, to).then(res => {
+        let data = JSON.parse(res);
+        console.log(res,'>>>>')
+        let dst = data.trans_result[0].dst
+        vscode.window.setStatusBarMessage(dst, cfgTranslateTimeout())
+    })
+    return
 }
 
 function activate(context) {
+
+    const command = 'extension.sayHello';
+    const commandHandler = (filename) => {
+        let editor = vscode_1.window.activeTextEditor;
+        let doc = editor.document;
+        if (editor.selection.isEmpty) {
+            return
+        } else {
+            let stext = doc.getText(editor.selection);
+            say.stop();
+
+            if (stext && stext.length > 1) {
+                let to = 'zh'
+                let from ='en'
+                stext = stext.replace(/_|-/g, ' ');
+                edited = false
+                if (!isChinese(stext)) {
+                    console.log('朗读', stext)
+                    say.stop();
+                    setTimeout(() => {
+                        say.speak(stext);
+                    }, 50);
+                } else {
+                    from ='zh'
+                    to = 'en'
+                }
+                getTranslate(stext, from, to)
+            }
+        };
+    }
+
+    context.subscriptions.push(vscode.commands.registerCommand(command, commandHandler));
+    return;
     // create a new word voice
     let wordVoice = new WordVoice();
     let controller = new WordVoiceController(wordVoice);
@@ -59,6 +102,7 @@ function activate(context) {
 }
 
 exports.activate = activate;
+// exports.sayHello = sayHello;
 class WordVoice {
     constructor() {
         this.WORDRE = /^[a-zA-Z_\s-]+$/;
@@ -83,7 +127,7 @@ class WordVoice {
         // this._statusBarItem.hide();
         //changing active editor        
         if (doc.fileName !== this._prevFilename) {
-            var fname = doc.fileName.replace(/^.*[\\\/]/, "").replace(/[^A-Za-z0-9]/g, ". ") /*.replace(/[.].*$/,"")*/ ;
+            var fname = doc.fileName.replace(/^.*[\\\/]/, "").replace(/[^A-Za-z0-9]/g, ". ") /*.replace(/[.].*$/,"")*/;
             //to avoid stopped by cursor voice, so it should voice later
             setTimeout(() => {
                 say.stop(); //stop cursor voice

@@ -12,7 +12,7 @@
         "Other"
     ],
     "activationEvents": [
-        "*"
+        "onCommand:extension.sayHello"
     ],
     "repository": {
         "type": "git",
@@ -20,62 +20,36 @@
     },
     "main": "./extension",
     "contributes": {
-        "hoverProvider": "true",
+        "commands": [
+            {
+                "command": "extension.sayHello",
+                "title": "翻译并朗读"
+            }
+        ],
+        "keybindings": [
+            {
+                 "command": "extension.sayHello", 
+                 "key": "ctrl+shift+t",    
+                 "mac": "cmd+shift+t",   
+                 "when": "editorHasSelection"   
+            }
+       ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "extension.sayHello",
+                    "group": "navigation",
+                    "when": "editorHasSelection"
+                }
+            ]
+        },
         "configuration": {
             "type": "object",
-            "title": "Word Voice configuration",
+            "title": "translate 设置",
             "properties": {
-                "translateSpeaker.disableAll": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "禁用全部功能"
-                },
-                "translateSpeaker.voiceFilename": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "切换文件时发声"
-                },
-                "translateSpeaker.voiceEditing": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "输入单词时发声"
-                },
-                "translateSpeaker.voiceCursor": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "移动光标时发声"
-                },
-                "translateSpeaker.voiceSelection": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "选定单词发声"
-                },
-                "translateSpeaker.translateEnabled": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "允许在状态栏显示翻译。"
-                },
-                "translateSpeaker.translateTimeout": {
-                    "type": "number",
-                    "default": 8000,
-                    "description": "翻译显示时间"
-                },
-                "translateSpeaker.wordMaxLength": {
-                    "type": "number",
-                    "default": 34,
-                    "description": "超过这个长度就不朗读了。"
-                },
-                "translateSpeaker.origin": {
-                    "type": "string",
-                    "default": "cn",
-                    "description": "访问google翻译站点后缀"
-                },
-                "translateSpeaker.debug": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "开启调试模式"
-                }
+                
             }
+
         }
     },
     "scripts": {
