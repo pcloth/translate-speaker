@@ -2,10 +2,8 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-const vscode_1 = require("vscode");
 const vscode = require("vscode");
 const say = require("say");
-
 const baiduTranslateApi = require('./lib/baiduapi.js');
 
 // 获取配置参数
@@ -13,37 +11,44 @@ const getConfigValue = function (name) {
     return vscode.workspace.getConfiguration('translateSpeaker').get(name);
 }
 
-
 // 检测是否中文
 function isChinese(text) {
     return /[\u4E00-\u9FA5\uF900-\uFA2D]/.test(text)
 }
 
-function encodeUnicode(str) {
-    var res = [];
-    for (var i = 0; i < str.length; i++) {
-        res[i] = ("00" + str.charCodeAt(i).toString(16)).slice(-4);
-    }
-    return "\\u" + res.join("\\u");
+// 显示信息框
+function showInformationMessage(message, code){
+    return vscode.window.showInformationMessage(message,{title:'知道了',code}).then(res=>{
+        console.log(res,'showOpenDialog')
+    })
 }
 
-
-function getTranslate({text, from, to}) {
-    console.log(text, from, to, '>>>>')
+// 执行翻译
+function getTranslate({ text, from, to }) {
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
-    if(!appid || !password){
-        return vscode.window.showInformationMessage('插件参数错误，没有配置appId和password')
+    if (!appid || !password) {
+        return showInformationMessage('插件参数错误，没有配置appId和password',100)
     }
-    baiduTranslateApi({text, from, to, appid, password}).then(res => {
+    baiduTranslateApi({ text, from, to, appid, password }).then(res => {
         let data = JSON.parse(res);
-        console.log(res, '>>>>')
+        translateResults({ text, from, to, results: data.trans_result || data });
+    }).catch(err => {
+
+    })
+    return
+}
+
+// 处理翻译结果
+function translateResults({ text, from, to, results }) {
+    if (results) {
         let items = [];
-        data.trans_result.forEach(item => {
+        results.forEach((item, index) => {
             let dst = decodeURIComponent(item.dst);
+            let num = index + 1;
             items.push({
-                label: `[ ${decodeURIComponent(text)} ] 翻译结果： [ ${dst} ]`,
-                description: `点击替换`,
+                label: `${num} [ ${decodeURIComponent(text)} ] 翻译结果： [ ${dst} ]`,
+                description: `点击或者输入${num}替换选中字符串`,
                 dst: dst,
             });
         })
@@ -51,21 +56,22 @@ function getTranslate({text, from, to}) {
             if (!selection) {
                 return;
             }
-            let editor = vscode_1.window.activeTextEditor;
-            if(to==='en'){
+            let editor = vscode.window.activeTextEditor;
+            if (to === 'en') {
                 speakText(selection.dst);
             }
             editor.edit((editBuilder) => {
                 editBuilder.replace(editor.selection, selection.dst);
             })
         });
-
-    })
-    return
+    } else {
+        return showInformationMessage(`翻译失败：${JSON.stringify(results)}`,102)
+    }
 }
 
-function speakText(text){
-    if(getConfigValue('enableSpeak')){
+// 语音播报
+function speakText(text) {
+    if (getConfigValue('enableSpeak')) {
         say.stop();
         setTimeout(() => {
             say.speak(text);
@@ -73,10 +79,12 @@ function speakText(text){
     }
 }
 
+
+// 激活扩展
 function activate(context) {
-    const command = 'extension.sayHello';
+    const command = 'extension.startTranslate';
     const commandHandler = (filename) => {
-        let editor = vscode_1.window.activeTextEditor;
+        let editor = vscode.window.activeTextEditor;
         let doc = editor.document;
         if (editor.selection.isEmpty || !getConfigValue('enable')) {
             // 没有选中文本或者没有启用功能；
@@ -86,6 +94,10 @@ function activate(context) {
             if (text && text.length > 1) {
                 let to = 'zh'
                 let from = 'en'
+                // 驼峰替换成空格
+                if(!/^[A-Z]+$/.test(text)){
+                    text = text.replace(/([A-Z])/g," $1");
+                }
                 // 下划线，连接线，小数点自动替换成空格
                 text = text.replace(/_|-|\./g, ' ');
                 if (!isChinese(text)) {
@@ -94,7 +106,7 @@ function activate(context) {
                     from = 'zh'
                     to = 'en'
                 }
-                getTranslate({text, from, to})
+                getTranslate({ text, from, to })
             }
         };
     }

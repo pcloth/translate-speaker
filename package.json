@@ -1,18 +1,18 @@
 {
-    "name": "translate-speaker",
-    "displayName": "translate speaker 翻译朗读者",
-    "description": "",
+    "name": "translate-speaker-api",
+    "displayName": "translate speaker 翻译朗读者API",
+    "description": "这是一个非常简单好用的翻译-朗读-替换字符串一体化插件，你只需要配置一个接口参数即可。",
     "version": "1.0.0",
-    "publisher": "pcloth",
+    "publisher": "pcloth-cn",
     "icon": "assert/logo.png",
     "engines": {
-        "vscode": "^1.50.0"
+        "vscode": "^1.1.37"
     },
     "categories": [
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onCommand:extension.startTranslate"
     ],
     "repository": {
         "type": "git",
@@ -22,22 +22,22 @@
     "contributes": {
         "commands": [
             {
-                "command": "extension.sayHello",
+                "command": "extension.startTranslate",
                 "title": "翻译并朗读"
             }
         ],
         "keybindings": [
             {
-                 "command": "extension.sayHello", 
-                 "key": "ctrl+shift+t",    
-                 "mac": "cmd+shift+t",   
-                 "when": "editorHasSelection"   
+                "command": "extension.startTranslate",
+                "key": "ctrl+shift+t",
+                "mac": "cmd+shift+t",
+                "when": "editorHasSelection"
             }
-       ],
+        ],
         "menus": {
             "editor/context": [
                 {
-                    "command": "extension.sayHello",
+                    "command": "extension.startTranslate",
                     "group": "navigation",
                     "when": "editorHasSelection"
                 }
@@ -60,8 +60,12 @@
                 "translateSpeaker.apiType": {
                     "type": "string",
                     "default": "baidu",
-                    "enum": ["baidu"],
-                    "description": ["百度翻译API"]
+                    "enum": [
+                        "baidu"
+                    ],
+                    "description": [
+                        "百度翻译API"
+                    ]
                 },
                 "translateSpeaker.appId": {
                     "type": "string",
@@ -74,7 +78,6 @@
                     "description": "翻译API的账号密钥，通常是指password或者appSecret"
                 }
             }
-
         }
     },
     "scripts": {
@@ -83,17 +86,18 @@
     },
     "devDependencies": {
         "typescript": "^2.6.1",
-        "vscode": "^1.1.6",
         "eslint": "^4.11.0",
         "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
+        "@types/mocha": "^2.2.42",
+        "vscode": "^1.1.37"
     },
     "dependencies": {
-        "google-translate-cn-api": "^1.0.5",
-        "say": "^0.13.1",
-        "typescript": "^2.6.1",
-        "eslint": "^4.11.0",
+        "@types/mocha": "^2.2.42",
         "@types/node": "^7.0.43",
-        "@types/mocha": "^2.2.42"
+        "eslint": "^4.11.0",
+        "request": "^2.88.2",
+        "request-promise": "^4.2.6",
+        "say": "^0.13.1",
+        "typescript": "^2.6.1"
     }
 }
