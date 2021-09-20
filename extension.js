@@ -5,6 +5,12 @@ Object.defineProperty(exports, "__esModule", {
 const vscode = require("vscode");
 const say = require("say");
 const baiduTranslateApi = require('./lib/baiduapi.js');
+const freeApi = require('./lib/freeApi.js');
+// const youdaoFreeApi = require('./lib/freeApi.js');
+
+let $event = {
+    fileExtension:'', // 文件后缀，用来确定输出英文格式
+}
 
 // 获取配置参数
 const getConfigValue = function (name) {
@@ -25,18 +31,57 @@ function showInformationMessage(message, code){
 
 // 执行翻译
 function getTranslate({ text, from, to }) {
+    let apiType = getConfigValue('apiType');
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
-    if (!appid || !password) {
-        return showInformationMessage('插件参数错误，没有配置appId和password',100)
-    }
-    baiduTranslateApi({ text, from, to, appid, password }).then(res => {
-        let data = JSON.parse(res);
-        translateResults({ text, from, to, results: data.trans_result || data });
-    }).catch(err => {
 
-    })
-    return
+    if(apiType==='youdaoFree'){
+        // 有道免费接口
+        return freeApi.youdaoFreeApi({ text, from, to, appid, password }).then(res=>{
+            let data = JSON.parse(res);
+            console.log(res,'>>>>youdaoFree')
+            let results = []
+            data.translateResult.forEach(row=>{
+                for(let i in row){
+                    results.push({
+                        dst:row[i].tgt
+                    })
+                }
+            })
+            translateResults({ text, from, to, results: results || res });
+        }).catch(res=>{
+            showInformationMessage(res.message||JSON.stringify(res.response))
+        })
+    }else if(apiType==='googleFree'){
+        // 谷歌免费接口
+        return freeApi.googleFreeApi({ text, from, to, appid, password }).then(res=>{
+            let data = JSON.parse(res);
+            console.log(res,'>>>>googleFree')
+            let results = []
+            data.sentences.forEach(row=>{
+                results.push({
+                    dst:row.trans
+                })
+            })
+            translateResults({ text, from, to, results: results || res });
+        }).catch(res=>{
+            showInformationMessage(res.message||JSON.stringify(res.response))
+        })
+    }else{
+        // 以下是注册接口，需要配置id和密钥
+        if (!appid || !password) {
+            return showInformationMessage('插件参数错误，没有配置appId和password',100)
+        }
+        if(apiType==='baidu'){
+            // 百度注册接口
+            return baiduTranslateApi({ text, from, to, appid, password }).then(res => {
+                let data = JSON.parse(res);
+                translateResults({ text, from, to, results: data.trans_result || data });
+            }).catch(res=>{
+                showInformationMessage(res.message||JSON.stringify(res.response))
+            })
+        }
+    }
 }
 
 // 处理翻译结果
@@ -83,7 +128,9 @@ function speakText(text) {
 // 激活扩展
 function activate(context) {
     const command = 'extension.startTranslate';
-    const commandHandler = (filename) => {
+    const commandHandler = (event) => {
+        let g = event.path.split('.')
+        $event.fileExtension = g[g.length-1] 
         let editor = vscode.window.activeTextEditor;
         let doc = editor.document;
         if (editor.selection.isEmpty || !getConfigValue('enable')) {
