@@ -28,9 +28,11 @@
 |translateSpeaker.password  | string | 无 | 翻译API的密钥 |
 
 ### 百度翻译API配置
-[如何获取百度翻译API的账号](!https://blog.csdn.net/zhebushibiaoshifu/article/details/115682054)
+如何获取百度翻译API的账号
+https://blog.csdn.net/zhebushibiaoshifu/article/details/115682054
 
-[百度翻译接口文档](!https://api.fanyi.baidu.com/product/113)
+百度翻译接口文档]
+https://api.fanyi.baidu.com/product/113
 
 
 
