@@ -6,6 +6,8 @@ const vscode = require("vscode");
 const say = require("say");
 const baiduTranslateApi = require('./lib/baiduapi.js');
 const freeApi = require('./lib/freeApi.js');
+const e2var = require('./lib/englishToVariable.js');
+
 // const youdaoFreeApi = require('./lib/freeApi.js');
 
 let $event = {
@@ -102,11 +104,15 @@ function translateResults({ text, from, to, results }) {
                 return;
             }
             let editor = vscode.window.activeTextEditor;
+            let newText = selection.dst
             if (to === 'en') {
+                if(getConfigValue('formatEnglish')){
+                    newText = e2var(selection.dst, $event.fileExtension)
+                }
                 speakText(selection.dst);
             }
             editor.edit((editBuilder) => {
-                editBuilder.replace(editor.selection, selection.dst);
+                editBuilder.replace(editor.selection, newText);
             })
         });
     } else {

@@ -1,7 +1,10 @@
-# Change Log
-All notable changes to the "translate-speaker" extension will be documented in this file.
+## 更新日志：
+> 2021-09-22 升级到 1.2.0 版本
+1. 添加自动转换英文内容到变量名（参数控制开关）
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+> 2021-09-20 升级到 1.1.1版本
+1. 添加有道免费接口和谷歌免费接口。
+2. 将默认接口调整为有道免费接口，这样无需配置接口账号了。
+3. 谷歌免费接口需要你的浏览器可以访问谷歌才可以使用（需要VPN）。
 
-## [Unreleased]
-- Initial release
+> 2021-09-18 重构代码，发布1.0版本。
