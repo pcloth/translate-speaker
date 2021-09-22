@@ -135,10 +135,12 @@ function speakText(text) {
 function activate(context) {
     const command = 'extension.startTranslate';
     const commandHandler = (event) => {
-        let g = event.path.split('.')
-        $event.fileExtension = g[g.length-1] 
         let editor = vscode.window.activeTextEditor;
         let doc = editor.document;
+        if(doc){
+            let g = doc.fileName.split('.')
+            $event.fileExtension = g[g.length-1]
+        }
         if (editor.selection.isEmpty || !getConfigValue('enable')) {
             // 没有选中文本或者没有启用功能；
             return
