@@ -27,7 +27,7 @@ function isChinese(text) {
 // 显示信息框
 function showInformationMessage(message, code){
     return vscode.window.showInformationMessage(message,{title:'知道了',code}).then(res=>{
-        console.log(res,'showOpenDialog')
+        // 点击信息框知道了按钮
     })
 }
 
@@ -41,7 +41,6 @@ function getTranslate({ text, from, to }) {
         // 有道免费接口
         return freeApi.youdaoFreeApi({ text, from, to, appid, password }).then(res=>{
             let data = JSON.parse(res);
-            console.log(res,'>>>>youdaoFree')
             let results = []
             data.translateResult.forEach(row=>{
                 for(let i in row){
@@ -58,7 +57,6 @@ function getTranslate({ text, from, to }) {
         // 谷歌免费接口
         return freeApi.googleFreeApi({ text, from, to, appid, password }).then(res=>{
             let data = JSON.parse(res);
-            console.log(res,'>>>>googleFree')
             let results = []
             data.sentences.forEach(row=>{
                 results.push({
@@ -149,13 +147,14 @@ function activate(context) {
             if (text && text.length > 1) {
                 let to = 'zh'
                 let from = 'en'
-                // 驼峰替换成空格
-                if(!/^[A-Z]+$/.test(text)){
-                    text = text.replace(/([A-Z])/g," $1");
-                }
-                // 下划线，连接线，小数点自动替换成空格
-                text = text.replace(/_|-|\./g, ' ');
                 if (!isChinese(text)) {
+                    if(/[a-z]/.test(text)){
+                        // 有小写字母的组合，全大写的不处理
+                        // 驼峰替换成空格
+                        text = text.replace(/([A-Z])/g," $1");
+                    }
+                    // 下划线，连接线，小数点自动替换成空格
+                    text = text.replace(/_|-|\./g, ' ');
                     speakText(text)
                 } else {
                     from = 'zh'
