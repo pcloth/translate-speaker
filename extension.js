@@ -125,7 +125,7 @@ class WordVoice {
         if (!this._statusBarItem) {
             this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
             this._statusBarItem.command = 'extension.statusBarClick'
-            this._statusBarItem.text = '翻译朗读者就绪';
+            this.initStatusBarItemText()
             this._statusBarItem.show();
         }
         this._commandsInstantiateObject = this._initCommand()
@@ -150,12 +150,27 @@ class WordVoice {
                 outDst = dst;
             })
             $event.results = res;
-            this._statusBarItem.text = `${text} | ${outDst}`
+            this.setStatusBarItemText(`${text} | ${outDst}`)
             // 显示quickpick菜单
             if (showQuickPick) {
                 translateResultsCodingMode(res)
             }
         })
+    }
+
+    // 初始化状态栏
+    initStatusBarItemText(){
+        this._statusBarItem.text = `翻译朗读者就绪(模式${getConfigValue('mode')})`;
+        $event.results = { text: '', from: '', to: '', results: [] } // 翻译结果清空
+    }
+
+    // 设置状态栏
+    setStatusBarItemText(text){
+        let dt = getConfigValue('translateTimeout');
+        this._statusBarItem.text = text
+        setTimeout(()=>{
+            this.initStatusBarItemText()
+        },dt)
     }
 
     // 用户主动点击了翻译按钮
