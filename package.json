@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换字符串一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.2.2",
+    "version": "1.3.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -12,7 +12,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.startTranslate"
+        "*"
     ],
     "repository": {
         "type": "git",
@@ -52,6 +52,22 @@
                     "default": true,
                     "description": "启用功能"
                 },
+                "translateSpeaker.mode": {
+                    "type": "string",
+                    "default": "auto",
+                    "enum": [
+                        "manual",
+                        "autoEnglish",
+                        "autoChinese",
+                        "auto"
+                    ],
+                    "description": [
+                        "手动模式：必须点击菜单或者快捷键后执行翻译。（翻译结果会弹出拾取菜单）",
+                        "自动英文翻译到中文模式：选中英文后，自动翻译（翻译结果只显示在左下角，点击后弹出拾取菜单）",
+                        "自动中文翻译到英文模式：选中中文后，自动翻译（翻译结果只显示在左下角，点击后弹出拾取菜单）",
+                        "自动翻译模式：选中内容后，自动翻译（翻译结果只显示在左下角，点击后弹出拾取菜单）"
+                    ]
+                },
                 "translateSpeaker.enableSpeak": {
                     "type": "boolean",
                     "default": true,
@@ -61,6 +77,16 @@
                     "type": "boolean",
                     "default": true,
                     "description": "英文自动转成格式变量"
+                },
+                "translateSpeaker.translateTimeout": {
+                    "type": "number",
+                    "default": 8000,
+                    "description": "翻译显示时间"
+                },
+                "translateSpeaker.wordMaxLength": {
+                    "type": "number",
+                    "default": 34,
+                    "description": "超过这个长度就不处理了。"
                 },
                 "translateSpeaker.apiType": {
                     "type": "string",

@@ -3,32 +3,14 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 const vscode = require("vscode");
-const say = require("say");
 const baiduTranslateApi = require('./lib/baiduapi.js');
 const freeApi = require('./lib/freeApi.js');
 const e2var = require('./lib/englishToVariable.js');
-
-// const youdaoFreeApi = require('./lib/freeApi.js');
+const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText } = require('./lib/common.js');
 
 let $event = {
-    fileExtension:'', // 文件后缀，用来确定输出英文格式
-}
-
-// 获取配置参数
-const getConfigValue = function (name) {
-    return vscode.workspace.getConfiguration('translateSpeaker').get(name);
-}
-
-// 检测是否中文
-function isChinese(text) {
-    return /[\u4E00-\u9FA5\uF900-\uFA2D]/.test(text)
-}
-
-// 显示信息框
-function showInformationMessage(message, code){
-    return vscode.window.showInformationMessage(message,{title:'知道了',code}).then(res=>{
-        // 点击信息框知道了按钮
-    })
+    fileExtension: '', // 文件后缀，用来确定输出英文格式
+    results: { text: '', from: '', to: '', results: [] }, // 翻译结果
 }
 
 // 执行翻译
@@ -36,61 +18,68 @@ function getTranslate({ text, from, to }) {
     let apiType = getConfigValue('apiType');
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
-
-    if(apiType==='youdaoFree'){
-        // 有道免费接口
-        return freeApi.youdaoFreeApi({ text, from, to, appid, password }).then(res=>{
-            let data = JSON.parse(res);
-            let results = []
-            data.translateResult.forEach(row=>{
-                for(let i in row){
-                    results.push({
-                        dst:row[i].tgt
-                    })
-                }
-            })
-            translateResults({ text, from, to, results: results || res });
-        }).catch(res=>{
-            showInformationMessage(res.message||JSON.stringify(res.response))
-        })
-    }else if(apiType==='googleFree'){
-        // 谷歌免费接口
-        return freeApi.googleFreeApi({ text, from, to, appid, password }).then(res=>{
-            let data = JSON.parse(res);
-            let results = []
-            data.sentences.forEach(row=>{
-                results.push({
-                    dst:row.trans
-                })
-            })
-            translateResults({ text, from, to, results: results || res });
-        }).catch(res=>{
-            showInformationMessage(res.message||JSON.stringify(res.response))
-        })
-    }else{
-        // 以下是注册接口，需要配置id和密钥
-        if (!appid || !password) {
-            return showInformationMessage('插件参数错误，没有配置appId和password',100)
-        }
-        if(apiType==='baidu'){
-            // 百度注册接口
-            return baiduTranslateApi({ text, from, to, appid, password }).then(res => {
+    return new Promise((resolve, reject) => {
+        if (apiType === 'youdaoFree') {
+            // 有道免费接口
+            return freeApi.youdaoFreeApi({ text, from, to, appid, password }).then(res => {
                 let data = JSON.parse(res);
-                translateResults({ text, from, to, results: data.trans_result || data });
-            }).catch(res=>{
-                showInformationMessage(res.message||JSON.stringify(res.response))
+                let results = []
+                data.translateResult.forEach(row => {
+                    for (let i in row) {
+                        results.push({
+                            dst: row[i].tgt
+                        })
+                    }
+                })
+                let params = { text, from, to, results: results || res }
+                resolve(params)
+            }).catch(res => {
+                showInformationMessage(res.message || JSON.stringify(res.response))
             })
+        } else if (apiType === 'googleFree') {
+            // 谷歌免费接口
+            return freeApi.googleFreeApi({ text, from, to, appid, password }).then(res => {
+                let data = JSON.parse(res);
+                let results = []
+                data.sentences.forEach(row => {
+                    results.push({
+                        dst: row.trans
+                    })
+                })
+                let params = { text, from, to, results: results || res }
+                resolve(params)
+            }).catch(res => {
+                showInformationMessage(res.message || JSON.stringify(res.response))
+            })
+        } else {
+            // 以下是注册接口，需要配置id和密钥
+            if (!appid || !password) {
+                return showInformationMessage('插件参数错误，没有配置appId和password', 100)
+            }
+            if (apiType === 'baidu') {
+                // 百度注册接口
+                return baiduTranslateApi({ text, from, to, appid, password }).then(res => {
+                    let data = JSON.parse(res);
+                    let params = { text, from, to, results: data.trans_result || data }
+                    resolve(params)
+                }).catch(res => {
+                    showInformationMessage(res.message || JSON.stringify(res.response))
+                })
+            }
         }
-    }
+
+    })
 }
 
-// 处理翻译结果
-function translateResults({ text, from, to, results }) {
+// coding模式处理翻译结果
+function translateResultsCodingMode({ text, from, to, results }) {
     if (results) {
         let items = [];
+        let outDst = ''
         results.forEach((item, index) => {
             let dst = decodeURIComponent(item.dst);
             let num = index + 1;
+            outDst = dst;
             items.push({
                 label: `${num} [ ${decodeURIComponent(text)} ] 翻译结果： [ ${dst} ]`,
                 description: `点击或者输入${num}替换选中字符串`,
@@ -104,7 +93,7 @@ function translateResults({ text, from, to, results }) {
             let editor = vscode.window.activeTextEditor;
             let newText = selection.dst
             if (to === 'en') {
-                if(getConfigValue('formatEnglish')){
+                if (getConfigValue('formatEnglish')) {
                     newText = e2var(selection.dst, $event.fileExtension)
                 }
                 speakText(selection.dst);
@@ -114,59 +103,182 @@ function translateResults({ text, from, to, results }) {
             })
         });
     } else {
-        return showInformationMessage(`翻译失败：${JSON.stringify(results)}`,102)
+        return showInformationMessage(`翻译失败：${JSON.stringify(results)}`, 102)
     }
 }
 
-// 语音播报
-function speakText(text) {
-    if (getConfigValue('enableSpeak')) {
-        say.stop();
-        setTimeout(() => {
-            say.speak(text);
-        }, 10);
+class WordVoice {
+    constructor(context) {
+        this.results = {}
+        this.context = context
+        this.timer = null
+        this._commands = [
+            {
+                command: 'extension.startTranslate',
+                handler: 'startTranslateCommandHandler',
+            },
+            {
+                command: 'extension.statusBarClick',
+                handler: 'statusClickcommandHandler',
+            }
+        ]
+        if (!this._statusBarItem) {
+            this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+            this._statusBarItem.command = 'extension.statusBarClick'
+            this._statusBarItem.text = '翻译朗读者就绪';
+            this._statusBarItem.show();
+        }
+        this._commandsInstantiateObject = this._initCommand()
     }
-}
 
+    // 执行翻译并显示结果
+    startWorking(text, showQuickPick = false) {
+        let to = 'zh'
+        let from = 'en'
+        if (!isChinese(text)) {
+            text = englishClearSelectionText(text)
+            speakText(text)
+        } else {
+            from = 'zh'
+            to = 'en'
+        }
+        getTranslate({ text, from, to }).then(res => {
+            let { text, from, to, results } = res
+            let outDst = ''
+            results.forEach((item, index) => {
+                let dst = decodeURIComponent(item.dst);
+                outDst = dst;
+            })
+            $event.results = res;
+            this._statusBarItem.text = `${text} | ${outDst}`
+            // 显示quickpick菜单
+            if (showQuickPick) {
+                translateResultsCodingMode(res)
+            }
+        })
+    }
 
-// 激活扩展
-function activate(context) {
-    const command = 'extension.startTranslate';
-    const commandHandler = (event) => {
+    // 用户主动点击了翻译按钮
+    startTranslateCommandHandler() {
         let editor = vscode.window.activeTextEditor;
         let doc = editor.document;
-        if(doc){
+        if (doc) {
             let g = doc.fileName.split('.')
-            $event.fileExtension = g[g.length-1]
+            $event.fileExtension = g[g.length - 1]
         }
         if (editor.selection.isEmpty || !getConfigValue('enable')) {
             // 没有选中文本或者没有启用功能；
             return
         } else {
             let text = doc.getText(editor.selection);
-            if (text && text.length > 1) {
+            if (text && text.length > 1 && text.length <= getConfigValue('wordMaxLength')) {
                 let to = 'zh'
                 let from = 'en'
                 if (!isChinese(text)) {
-                    if(/[a-z]/.test(text)){
-                        // 有小写字母的组合，全大写的不处理
-                        // 驼峰替换成空格
-                        text = text.replace(/([A-Z])/g," $1");
-                    }
-                    // 下划线，连接线，小数点自动替换成空格
-                    text = text.replace(/_|-|\./g, ' ');
+                    text = englishClearSelectionText(text)
                     speakText(text)
                 } else {
                     from = 'zh'
                     to = 'en'
                 }
-                getTranslate({ text, from, to })
+
+                this.throttleRun(text, true)
             }
         };
     }
-    context.subscriptions.push(vscode.commands.registerCommand(command, commandHandler));
-    return;
+
+    // 用户点击了左下角的状态栏
+    statusClickcommandHandler() {
+        if (!$event.results.text) { return; }
+        translateResultsCodingMode($event.results)
+    }
+
+    // 初始化指令
+    _initCommand() {
+        let arr = []
+        this._commands.forEach(cmd => {
+            let obj = vscode.commands.registerCommand(cmd.command, () => {
+                this[cmd.handler]()
+            })
+            this.context.subscriptions.push(obj);
+            arr.push(obj)
+        })
+        return arr;
+    }
+
+    onDidChanage() {
+        let editor = vscode.window.activeTextEditor;
+        let doc = editor.document;
+        if (editor.selection.isEmpty || !getConfigValue('enable')) {
+            // 没有选中文本或者没有启用功能；
+            return
+        }
+        // 手动不执行
+        let mode = getConfigValue('mode');
+        if (mode === 'manual') { return; }
+        // Create as needed
+        var text = doc.getText(editor.selection);
+        if (
+            text && text.length > 1 && text.length <= getConfigValue('wordMaxLength') && (
+                // 全自动|| 自动英文 || 自动中文
+                mode === 'auto' || (mode === 'autoEnglish' && !isChinese(text)) || (mode === 'autoChinese' && isChinese(text))
+            )
+        ) {
+            // if($event.results.from===text||)
+            this.throttleRun(text, false)
+        }
+        return
+    }
+
+    throttleRun(text, showQuickPick) {
+        let results = $event.results.results;
+        if (!showQuickPick && ($event.results.text == text || results.length && results[0].dst == text)) {
+            // 如果不是手动要求翻译，判断一下是否已经翻译过了，翻译过了的词不处理。
+            return
+        }
+
+        if (this.timer) {
+            clearTimeout(this.timer)
+        }
+        this.timer = setTimeout(() => {
+            this.startWorking(text, showQuickPick)
+        }, 500)
+    }
+
+    dispose() {
+        this._statusBarItem.dispose();
+    }
+}
+
+class WordVoiceController {
+    constructor(wordVoice) {
+        this._wordVoice = wordVoice;
+        // subscribe to selection change and editor activation events
+        let subscriptions = [];
+        // vscode.window.onDidChangeActiveTextEditor(this._onEvent, this, subscriptions);
+        vscode.window.onDidChangeTextEditorSelection(this._onEvent, this, subscriptions);
+        // create a combined disposable from both event subscriptions
+        this._disposable = vscode.Disposable.from(...subscriptions);
+    }
+    dispose() {
+        this._disposable.dispose();
+    }
+    _startTranslateCommandHandler() {
+        this._wordVoice.startTranslateCommandHandler();
+    }
+    _onEvent(e) {
+        this._wordVoice.onDidChanage();
+    }
+}
+
+// 激活扩展
+function activate(context) {
+
+    let wordVoice = new WordVoice(context);
+    let controller = new WordVoiceController(wordVoice);
+    // Add to a list of disposables which are disposed when this extension is deactivated.
+    context.subscriptions.push(controller);
+    context.subscriptions.push(wordVoice);
 }
 
 exports.activate = activate;
-
