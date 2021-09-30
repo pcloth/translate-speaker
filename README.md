@@ -19,6 +19,9 @@
 |translateSpeaker.appId  | string | 无 | 翻译API的账号 |
 |translateSpeaker.password  | string | 无 | 翻译API的密钥 |
 |translateSpeaker.formatEnglish | boolean | true | 英文自动转成格式变量，根据常见扩展名自动转换规范变量名称，比如apple tree输出为appleTree |
+|translateSpeaker.mode|string|manual|工作模式：manual=手动，autoEnglish=自动翻译英文，autoChinese=自动翻译中文，auto=自动中英文转换|
+|translateSpeaker.translateTimeout|number|8000|翻译结果在左下角状态栏显示多长时间（毫秒）|
+|translateSpeaker.wordMaxLength|number|34|超过这个长度的字符串不处理|
 
 ### 百度翻译API配置
 如何获取百度翻译API的账号

@@ -54,7 +54,7 @@
                 },
                 "translateSpeaker.mode": {
                     "type": "string",
-                    "default": "auto",
+                    "default": "manual",
                     "enum": [
                         "manual",
                         "autoEnglish",
