@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换字符串一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -80,7 +80,7 @@
                 },
                 "translateSpeaker.translateTimeout": {
                     "type": "number",
-                    "default": 8000,
+                    "default": 15000,
                     "description": "翻译显示时间"
                 },
                 "translateSpeaker.wordMaxLength": {

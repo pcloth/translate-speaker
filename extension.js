@@ -75,27 +75,41 @@ function getTranslate({ text, from, to }) {
 function translateResultsCodingMode({ text, from, to, results }) {
     if (results) {
         let items = [];
-        let outDst = ''
-        results.forEach((item, index) => {
-            let dst = decodeURIComponent(item.dst);
-            let num = index + 1;
-            outDst = dst;
+        let num = 1;
+        let formatEnglish = getConfigValue('formatEnglish');
+        text = decodeURIComponent(text)
+        results.forEach(item => {
+            let dst = decodeURIComponent(item.dst).toLowerCase();
+            let outText = dst;
+            let label = `${num} [ ${text} ] 翻译结果： [ ${dst} ]`
+            if(formatEnglish && to === 'en'){
+                outText = e2var(dst, $event.fileExtension);
+                items.push({
+                    label: `${num} [ ${text} ] 翻译结果： [ ${outText} ]`,
+                    description: `替换选中字符串为格式化后的字符串`,
+                    dst: dst,
+                    outText:outText,
+                });
+                num += 1 ;
+                label = `${num} [ ${text} ] 原始结果： [ ${dst} ]`
+            }
             items.push({
-                label: `${num} [ ${decodeURIComponent(text)} ] 翻译结果： [ ${dst} ]`,
-                description: `点击或者输入${num}替换选中字符串`,
+                label: label,
+                description: `替换选中字符串`,
                 dst: dst,
+                outText:dst,
             });
+
+            num += 1 ;
+            
         })
         vscode.window.showQuickPick(items).then(selection => {
             if (!selection) {
                 return;
             }
             let editor = vscode.window.activeTextEditor;
-            let newText = selection.dst
+            let newText = selection.outText
             if (to === 'en') {
-                if (getConfigValue('formatEnglish')) {
-                    newText = e2var(selection.dst, $event.fileExtension)
-                }
                 speakText(selection.dst);
             }
             editor.edit((editBuilder) => {
