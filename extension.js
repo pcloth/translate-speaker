@@ -103,14 +103,20 @@ function translateResultsCodingMode({ text, from, to, results }) {
             num += 1 ;
             
         })
+        // 点击了快速选择框
         vscode.window.showQuickPick(items).then(selection => {
             if (!selection) {
+                showInformationMessage('请选中一个项目')    
                 return;
             }
             let editor = vscode.window.activeTextEditor;
             let newText = selection.outText
-            if (to === 'en') {
-                speakText(selection.dst);
+            if (to === 'en' && getConfigValue('enableSpeak')) {
+                try {
+                    speakText(selection.dst);
+                } catch (error) {
+                    
+                }
             }
             editor.edit((editBuilder) => {
                 editBuilder.replace(editor.selection, newText);
@@ -174,7 +180,7 @@ class WordVoice {
 
     // 初始化状态栏
     initStatusBarItemText(){
-        this._statusBarItem.text = `翻译朗读者就绪(模式${getConfigValue('mode')})`;
+        this._statusBarItem.text = `翻译朗读者就绪( ${getConfigValue('mode')} | ${getConfigValue('apiType')} )`;
         $event.results = { text: '', from: '', to: '', results: [] } // 翻译结果清空
     }
 
