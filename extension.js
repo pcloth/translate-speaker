@@ -6,7 +6,7 @@ const vscode = require("vscode");
 const baiduTranslateApi = require('./lib/baiduapi.js');
 const freeApi = require('./lib/freeApi.js');
 const e2var = require('./lib/englishToVariable.js');
-const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText } = require('./lib/common.js');
+const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText, longTextShowShort } = require('./lib/common.js');
 
 let $event = {
     fileExtension: '', // 文件后缀，用来确定输出英文格式
@@ -76,37 +76,62 @@ function translateResultsCodingMode({ text, from, to, results }) {
     if (results) {
         let items = [];
         let num = 1;
-        let formatEnglish = getConfigValue('formatEnglish');
         text = decodeURIComponent(text)
+        const shortText = longTextShowShort(text)
+        const pickTypeAndSort = getConfigValue('pickTypeAndSort') || [];
+        if (!pickTypeAndSort.length) {
+            // 预防用户配置空
+            pickTypeAndSort.push('replace')
+        }
+
         results.forEach(item => {
             let dst = decodeURIComponent(item.dst).toLowerCase();
+            let shortDst = longTextShowShort(dst)
             let outText = dst;
-            let label = `${num} [ ${text} ] 翻译结果： [ ${dst} ]`
-            if(formatEnglish && to === 'en'){
-                outText = e2var(dst, $event.fileExtension);
-                items.push({
-                    label: `${num} [ ${text} ] 翻译结果： [ ${outText} ]`,
-                    description: `替换选中字符串为格式化后的字符串`,
-                    dst: dst,
-                    outText:outText,
-                });
-                num += 1 ;
-                label = `${num} [ ${text} ] 原始结果： [ ${dst} ]`
-            }
-            items.push({
-                label: label,
-                description: `替换选中字符串`,
-                dst: dst,
-                outText:dst,
-            });
 
-            num += 1 ;
-            
+            // 根据类型排序生成pick数据
+            pickTypeAndSort.forEach(type => {
+                // coding 模式
+                if (type === 'coding' && to === 'en') {
+                    outText = e2var(dst, $event.fileExtension);
+                    items.push({
+                        original: text,
+                        label: `${num} [ ${shortText} ] 替换 => [ ${longTextShowShort(outText)} ]`,
+                        description: `替换选中字符串为格式化后的字符串`,
+                        dst: dst,
+                        outText: outText,
+                    });
+                    num += 1
+                }
+                // 原文替换
+                if (type === 'replace') {
+                    items.push({
+                        original: text,
+                        label: `${num} [ ${shortText} ] 替换 => [ ${shortDst} ]`,
+                        description: `替换选中字符串`,
+                        dst: dst,
+                        outText: dst,
+                    });
+                    num += 1
+                }
+
+                // 原文追加
+                if (type === 'append') {
+                    items.push({
+                        original: text,
+                        label: `${num} [ ${shortText} ] 追加 => [ ${shortDst} ]`,
+                        description: `保留原文并在后方[]中加入翻译`,
+                        dst: dst,
+                        outText: `${text} [ ${dst} ]`,
+                    });
+                    num += 1
+                }
+            })
         })
         // 点击了快速选择框
         vscode.window.showQuickPick(items).then(selection => {
             if (!selection) {
-                showInformationMessage('请选中一个项目')    
+                showInformationMessage('请选中一个项目')
                 return;
             }
             let editor = vscode.window.activeTextEditor;
@@ -115,7 +140,7 @@ function translateResultsCodingMode({ text, from, to, results }) {
                 try {
                     speakText(selection.dst);
                 } catch (error) {
-                    
+
                 }
             }
             editor.edit((editBuilder) => {
@@ -179,18 +204,18 @@ class WordVoice {
     }
 
     // 初始化状态栏
-    initStatusBarItemText(){
+    initStatusBarItemText() {
         this._statusBarItem.text = `翻译朗读者就绪( ${getConfigValue('mode')} | ${getConfigValue('apiType')} )`;
         $event.results = { text: '', from: '', to: '', results: [] } // 翻译结果清空
     }
 
     // 设置状态栏
-    setStatusBarItemText(text){
+    setStatusBarItemText(text) {
         let dt = getConfigValue('translateTimeout');
         this._statusBarItem.text = text
-        setTimeout(()=>{
+        setTimeout(() => {
             this.initStatusBarItemText()
-        },dt)
+        }, dt)
     }
 
     // 用户主动点击了翻译按钮

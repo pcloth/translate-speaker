@@ -1,8 +1,8 @@
 {
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
-    "description": "这是一个非常简单好用的翻译-朗读-替换字符串一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.4.1",
+    "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
+    "version": "1.5.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -68,15 +68,17 @@
                         "自动翻译模式：选中内容后，自动翻译（翻译结果只显示在左下角，点击后弹出拾取菜单）"
                     ]
                 },
+                "translateSpeaker.pickTypeAndSort": {
+                    "type": "array",
+                    "default": ["coding","replace","append"],
+                    "scope":"scope",
+                    "description": "配置拾取器和排序：\ncoding=转换成变量模式\nreplace=直接替换原文\nappend=在原文后面追加翻译"
+                    
+                },
                 "translateSpeaker.enableSpeak": {
                     "type": "boolean",
                     "default": true,
                     "description": "启用朗读"
-                },
-                "translateSpeaker.formatEnglish": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "英文自动转成格式变量"
                 },
                 "translateSpeaker.translateTimeout": {
                     "type": "number",

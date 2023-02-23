@@ -1,6 +1,16 @@
 # 项目说明
 
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
+## 更新说明
+2023-02-23 更新到 1.5.0
+1、添加`pickTypeAndSort`参数，配置拾取器和排序，默认排序和内容如下：
+`coding` = 转换成变量模式
+`replace` = 直接替换原文
+`append` = 在原文后面追加翻译
+
+2、取消了formatEnglish参数
+
+
 
 ## 更新说明
 2022-10-21 更新到 1.4.1
@@ -23,7 +33,6 @@
 |translateSpeaker.apiType | string | 'youdaoFree'| 接口类型，目前支持：baidu=百度翻译api(需要账号)，youdaoFree=有道，googleFree=谷歌（需要VPN） |
 |translateSpeaker.appId  | string | 无 | 翻译API的账号 |
 |translateSpeaker.password  | string | 无 | 翻译API的密钥 |
-|translateSpeaker.formatEnglish | boolean | true | 英文自动转成格式变量，根据常见扩展名自动转换规范变量名称，比如apple tree输出为appleTree |
 |translateSpeaker.mode|string|manual|工作模式：manual=手动，autoEnglish=自动翻译英文，autoChinese=自动翻译中文，auto=自动中英文转换|
 |translateSpeaker.translateTimeout|number|15000|翻译结果在左下角状态栏显示多长时间（毫秒）|
 |translateSpeaker.wordMaxLength|number|34|超过这个长度的字符串不处理|
