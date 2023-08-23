@@ -94,6 +94,9 @@ function translateResultsCodingMode({ text, from, to, results }) {
                 // coding 模式
                 if (type === 'coding' && to === 'en') {
                     const codingFormat = getConfigValue('codingFormat') || [];
+                    if(codingFormat.length===0){
+                        codingFormat.push('auto')
+                    }
                     let description = ''
                     codingFormat.forEach(fmType=>{
                         const typeName = typeMaps[fmType]||'-error-'

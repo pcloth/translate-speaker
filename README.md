@@ -3,6 +3,23 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
+2023-08-23 更新到 1.5.1
+
+1. 添加了`codingFormat`参数，当`pickTypeAndSort`参数中有`coding`的时候生效，将在coding的模式下对字符串进行格式化，如果全部清空将使用`auto`
+转换成变量模式的格式：
+
+> `auto`=自动识别
+
+> `PascalCase`=大驼峰
+
+> `lowerCamelCase`=小驼峰
+
+> `snake_case`=蛇形（下划线）
+
+> `space`=空格
+
+> `kebab-case`=短横线
+
 2023-04-15 
 1. 更新文档
 
@@ -39,6 +56,7 @@
 |translateTimeout|number|15000|翻译结果在左下角状态栏显示多长时间（毫秒）|
 |wordMaxLength|number|34|超过这个长度的字符串不处理|
 |pickTypeAndSort|array|["coding","replace","append"]|配置拾取器排序
+|codingFormat|array|["auto","PascalCase","lowerCamelCase","snake_case","space","kebab-case"]|配置当pickTypeAndSort中包含有coding的时候的格式化拾取器排序
 
 ### 百度翻译API配置
 如何获取百度翻译API的账号
