@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 const vscode = require("vscode");
 const baiduTranslateApi = require('./lib/baiduapi.js');
 const freeApi = require('./lib/freeApi.js');
-const e2var = require('./lib/englishToVariable.js');
+const {e2var,typeMaps} = require('./lib/englishToVariable.js');
 const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText, longTextShowShort } = require('./lib/common.js');
 
 let $event = {
@@ -77,7 +77,7 @@ function translateResultsCodingMode({ text, from, to, results }) {
         let items = [];
         let num = 1;
         text = decodeURIComponent(text)
-        const shortText = longTextShowShort(text)
+        const shortText = longTextShowShort(text, 5)
         const pickTypeAndSort = getConfigValue('pickTypeAndSort') || [];
         if (!pickTypeAndSort.length) {
             // 预防用户配置空
@@ -93,15 +93,26 @@ function translateResultsCodingMode({ text, from, to, results }) {
             pickTypeAndSort.forEach(type => {
                 // coding 模式
                 if (type === 'coding' && to === 'en') {
-                    outText = e2var(dst, $event.fileExtension);
-                    items.push({
-                        original: text,
-                        label: `${num} [ ${shortText} ] 替换 => [ ${longTextShowShort(outText)} ]`,
-                        description: `替换选中字符串为格式化后的字符串`,
-                        dst: dst,
-                        outText: outText,
-                    });
-                    num += 1
+                    const codingFormat = getConfigValue('codingFormat') || [];
+                    let description = ''
+                    codingFormat.forEach(fmType=>{
+                        const typeName = typeMaps[fmType]||'-error-'
+                        if(fmType==='auto'){
+                            outText = e2var(dst, $event.fileExtension);
+                            description = `根据（当前文件扩展名）确定格式化类型，并替换当前选中字符串`
+                        }else{
+                            outText = e2var(dst, '', fmType);
+                            description = `替换选中字符串为（${typeName}）格式化后的字符串`
+                        }
+                        items.push({
+                            original: text,
+                            label: `${num} [ ${shortText} ] 替换(${typeName}) => [ ${longTextShowShort(outText)} ]`,
+                            description: description,
+                            dst: dst,
+                            outText: outText,
+                        });
+                        num += 1
+                    })
                 }
                 // 原文替换
                 if (type === 'replace') {
