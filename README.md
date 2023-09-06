@@ -3,6 +3,11 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
+2023-09-06 升级到 1.5.2 版本
+1. 移除youdaoFree接口
+2. 添加bing接口，并设置为了默认
+
+
 2023-08-23 更新到 1.5.1
 
 1. 添加了`codingFormat`参数，当`pickTypeAndSort`参数中有`coding`的时候生效，将在coding的模式下对字符串进行格式化，如果全部清空将使用`auto`
@@ -49,7 +54,7 @@
 |---|---|---|---|
 |enable | boolean | true | 是否启用插件功能 |
 |enableSpeak | boolean | true | 是否启用语音朗读 |
-|apiType | string | 'youdaoFree'| 接口类型，目前支持：baidu=百度翻译api(需要账号)，youdaoFree=有道，googleFree=谷歌（需要VPN） |
+|apiType | string | 'bing'| 接口类型，目前支持：baidu=百度翻译api(需要账号)，bing=必应，googleFree=谷歌（需要VPN） |
 |appId  | string | 无 | 翻译API的账号 |
 |password  | string | 无 | 翻译API的密钥 |
 |mode|string|manual|工作模式：manual=手动，autoEnglish=自动翻译英文，autoChinese=自动翻译中文，auto=自动中英文转换|

@@ -19,22 +19,14 @@ function getTranslate({ text, from, to }) {
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
     return new Promise((resolve, reject) => {
-        if (apiType === 'youdaoFree') {
-            // 有道免费接口
-            return freeApi.youdaoFreeApi({ text, from, to, appid, password }).then(res => {
-                let data = JSON.parse(res);
-                let results = []
-                data.translateResult.forEach(row => {
-                    for (let i in row) {
-                        results.push({
-                            dst: row[i].tgt
-                        })
-                    }
-                })
-                let params = { text, from, to, results: results || res }
+        if (['youdaoFree','bing'].includes(apiType)) {
+            // 必应接口
+            return freeApi.bingFreeApi({ text, from, to, appid, password }).then(res => {
+                const results = [{dst:res}]
+                const params = { text, from, to, results: results || res }
                 resolve(params)
-            }).catch(res => {
-                showInformationMessage(res.message || JSON.stringify(res.response))
+            }).catch(error=>{
+                reject(error)
             })
         } else if (apiType === 'googleFree') {
             // 谷歌免费接口

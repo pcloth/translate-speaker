@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -70,15 +70,25 @@
                 },
                 "translateSpeaker.pickTypeAndSort": {
                     "type": "array",
-                    "default": ["coding","replace","append"],
-                    "scope":"scope",
+                    "default": [
+                        "coding",
+                        "replace",
+                        "append"
+                    ],
+                    "scope": "scope",
                     "description": "配置拾取器和排序：\ncoding=转换成变量模式\nreplace=直接替换原文\nappend=在原文后面追加翻译"
-                    
                 },
                 "translateSpeaker.codingFormat": {
-                    "type":"array",
-                    "default":["auto","PascalCase","lowerCamelCase","snake_case","space","kebab-case"],
-                    "scope":"scope",
+                    "type": "array",
+                    "default": [
+                        "auto",
+                        "PascalCase",
+                        "lowerCamelCase",
+                        "snake_case",
+                        "space",
+                        "kebab-case"
+                    ],
+                    "scope": "scope",
                     "description": "转换成变量模式的格式：\nauto=自动识别\nPascalCase=大驼峰\nlowerCamelCase=小驼峰\nsnake_case=蛇形（下划线）\nspace=空格\nkebab-case=短横线"
                 },
                 "translateSpeaker.enableSpeak": {
@@ -98,15 +108,15 @@
                 },
                 "translateSpeaker.apiType": {
                     "type": "string",
-                    "default": "youdaoFree",
+                    "default": "bing",
                     "enum": [
                         "baidu",
-                        "youdaoFree",
+                        "bing",
                         "googleFree"
                     ],
                     "description": [
                         "百度翻译API",
-                        "有道免费接口-无需配置账号",
+                        "必应接口-无需配置账号/可配置自己的appid获得更好速度",
                         "谷歌免费接口-无需配置账号"
                     ]
                 },
@@ -128,10 +138,10 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "typescript": "^2.6.1",
-        "eslint": "^4.11.0",
-        "@types/node": "^7.0.43",
         "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "eslint": "^4.11.0",
+        "typescript": "^2.6.1",
         "vscode": "^1.1.37"
     },
     "dependencies": {
