@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 const vscode = require("vscode");
 const baiduTranslateApi = require('./lib/baiduapi.js');
 const freeApi = require('./lib/freeApi.js');
-const {e2var,typeMaps} = require('./lib/englishToVariable.js');
+const { e2var, typeMaps } = require('./lib/englishToVariable.js');
 const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText, longTextShowShort } = require('./lib/common.js');
 
 let $event = {
@@ -19,13 +19,13 @@ function getTranslate({ text, from, to }) {
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
     return new Promise((resolve, reject) => {
-        if (['youdaoFree','bing'].includes(apiType)) {
+        if (['youdaoFree', 'bing'].includes(apiType)) {
             // 必应接口
             return freeApi.bingFreeApi({ text, from, to, appid, password }).then(res => {
-                const results = [{dst:res}]
+                const results = [{ dst: res }]
                 const params = { text, from, to, results: results || res }
                 resolve(params)
-            }).catch(error=>{
+            }).catch(error => {
                 reject(error)
             })
         } else if (apiType === 'googleFree') {
@@ -64,7 +64,7 @@ function getTranslate({ text, from, to }) {
 }
 
 // coding模式处理翻译结果
-function translateResultsCodingMode({ text, from, to, results }) {
+function translateResultsCodingMode({ text, from, to, results }, options = { replace: true, append: true }) {
     if (results) {
         let items = [];
         let num = 1;
@@ -86,16 +86,16 @@ function translateResultsCodingMode({ text, from, to, results }) {
                 // coding 模式
                 if (type === 'coding' && to === 'en') {
                     const codingFormat = getConfigValue('codingFormat') || [];
-                    if(codingFormat.length===0){
+                    if (codingFormat.length === 0) {
                         codingFormat.push('auto')
                     }
                     let description = ''
-                    codingFormat.forEach(fmType=>{
-                        const typeName = typeMaps[fmType]||'-error-'
-                        if(fmType==='auto'){
+                    codingFormat.forEach(fmType => {
+                        const typeName = typeMaps[fmType] || '-error-'
+                        if (fmType === 'auto') {
                             outText = e2var(dst, $event.fileExtension);
                             description = `根据（当前文件扩展名）确定格式化类型，并替换当前选中字符串`
-                        }else{
+                        } else {
                             outText = e2var(dst, '', fmType);
                             description = `替换选中字符串为（${typeName}）格式化后的字符串`
                         }
@@ -110,7 +110,7 @@ function translateResultsCodingMode({ text, from, to, results }) {
                     })
                 }
                 // 原文替换
-                if (type === 'replace') {
+                if (type === 'replace' && options.replace) {
                     items.push({
                         original: text,
                         label: `${num} [ ${shortText} ] 替换 => [ ${shortDst} ]`,
@@ -122,7 +122,7 @@ function translateResultsCodingMode({ text, from, to, results }) {
                 }
 
                 // 原文追加
-                if (type === 'append') {
+                if (type === 'append' && options.append) {
                     items.push({
                         original: text,
                         label: `${num} [ ${shortText} ] 追加 => [ ${shortDst} ]`,
@@ -171,6 +171,10 @@ class WordVoice {
             {
                 command: 'extension.statusBarClick',
                 handler: 'statusClickcommandHandler',
+            },
+            {
+                command: "extension.convertVariableFormat",
+                handler: 'startConvertVariableFormat',
             }
         ]
         if (!this._statusBarItem) {
@@ -224,39 +228,79 @@ class WordVoice {
         }, dt)
     }
 
-    // 用户主动点击了翻译按钮
-    startTranslateCommandHandler() {
-        let editor = vscode.window.activeTextEditor;
-        let doc = editor.document;
+    // 获取选中文本
+    _getSelectionText() {
+        const editor = vscode.window.activeTextEditor;
+        const doc = editor.document;
         if (doc) {
-            let g = doc.fileName.split('.')
+            const g = doc.fileName.split('.')
             $event.fileExtension = g[g.length - 1]
         }
-        if (editor.selection.isEmpty || !getConfigValue('enable')) {
-            // 没有选中文本或者没有启用功能；
-            return
-        } else {
-            let text = doc.getText(editor.selection);
-            if (text && text.length > 1 && text.length <= getConfigValue('wordMaxLength')) {
-                let to = 'zh'
-                let from = 'en'
-                if (!isChinese(text)) {
-                    text = englishClearSelectionText(text)
-                    speakText(text)
-                } else {
-                    from = 'zh'
-                    to = 'en'
-                }
+        if (editor.selection.isEmpty) { return '' }
+        return doc.getText(editor.selection)
+    }
 
-                this.throttleRun(text, true)
+    // 用户主动点击了翻译按钮
+    startTranslateCommandHandler() {
+        if (!getConfigValue('enable')) {
+            return showInformationMessage('请先启用插件enable参数', 100)
+        }
+        let text = this._getSelectionText()
+        if (text && text.length > 1 && text.length <= getConfigValue('wordMaxLength')) {
+            let to = 'zh'
+            let from = 'en'
+            if (!isChinese(text)) {
+                text = englishClearSelectionText(text)
+                speakText(text)
+            } else {
+                from = 'zh'
+                to = 'en'
             }
-        };
+
+            this.throttleRun(text, true)
+        }
     }
 
     // 用户点击了左下角的状态栏
     statusClickcommandHandler() {
         if (!$event.results.text) { return; }
         translateResultsCodingMode($event.results)
+    }
+
+    // 用户点击了转换变量格式菜单
+    startConvertVariableFormat() {
+        if (!getConfigValue('enable')) {
+            return showInformationMessage('请先启用插件enable参数', 100)
+        }
+        const originText = this._getSelectionText()
+        let text = originText
+        if (originText) {
+            text = this._convertVariablesToWords(originText)
+            translateResultsCodingMode(
+                { text: originText, from: 'en', to: 'en', results: [{ dst: text }] },
+                { append: false, replace: false }
+            )
+        }
+    }
+
+    _convertVariablesToWords(text) {
+        // 判断命名格式
+        if (/^[a-z][a-zA-Z0-9]*$/.test(text)) {
+            // 小驼峰命名格式
+            return text.replace(/([A-Z])/g, ' $1').toLowerCase();
+        } else if (/^[A-Z][a-zA-Z0-9]*$/.test(text)) {
+            // 大驼峰命名格式
+            return text.replace(/([A-Z])/g, ' $1').trim().toLowerCase();
+        } else if (/^[a-zA-Z][a-zA-Z0-9_]*$/.test(text)) {
+            // 下划线（蛇形）命名格式
+            return text.replace(/_/g, ' ').toLowerCase();
+        } else if (/^[a-zA-Z][a-zA-Z0-9\-]*$/.test(text)) {
+            // 短横线命名格式
+            return text.replace(/-/g, ' ').toLowerCase();
+        } else {
+            // 无法识别的格式，返回原始文本
+            return text;
+        }
     }
 
     // 初始化指令

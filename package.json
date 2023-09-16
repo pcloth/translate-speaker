@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.5.2",
+    "version": "1.6.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -24,6 +24,10 @@
             {
                 "command": "extension.startTranslate",
                 "title": "翻译并朗读"
+            },
+            {
+                "command": "extension.convertVariableFormat",
+                "title": "转换变量格式并朗读"
             }
         ],
         "keybindings": [
@@ -38,6 +42,11 @@
             "editor/context": [
                 {
                     "command": "extension.startTranslate",
+                    "group": "navigation",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "extension.convertVariableFormat",
                     "group": "navigation",
                     "when": "editorHasSelection"
                 }
