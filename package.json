@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -94,11 +94,12 @@
                         "PascalCase",
                         "lowerCamelCase",
                         "snake_case",
+                        "SNAKE_CASE",
                         "space",
                         "kebab-case"
                     ],
                     "scope": "scope",
-                    "description": "转换成变量模式的格式：\nauto=自动识别\nPascalCase=大驼峰\nlowerCamelCase=小驼峰\nsnake_case=蛇形（下划线）\nspace=空格\nkebab-case=短横线"
+                    "description": "转换成变量模式的格式：\nauto=自动识别\nPascalCase=大驼峰\nlowerCamelCase=小驼峰\nsnake_case=小写蛇形（下划线）\nSNAKE_CASE=大写蛇型（下划线）\nspace=空格\nkebab-case=短横线"
                 },
                 "translateSpeaker.enableSpeak": {
                     "type": "boolean",
