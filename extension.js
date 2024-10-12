@@ -16,19 +16,38 @@ let $event = {
 // 执行翻译
 function getTranslate({ text, from, to }) {
     let apiType = getConfigValue('apiType');
+    // 旧方案
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
+    const apiAccount = getConfigValue('apiAccount') || [];
+    if(appid){
+        console.log('还在使用旧账号配置', appid, password)
+        // 提示用户升级配置
+        // vscode.window.showInformationMessage('插件配置已经升级，请删除translateSpeaker.appId和translateSpeaker.password配置，使用apiAccount配置', { title: '查看文档', code:100 }).then(() => {
+        //     // 点击打开url；https://github.com/pcloth/translate-speaker
+        //     vscode.env.openExternal(vscode.Uri.parse('https://github.com/pcloth/translate-speaker'));
+        // })
+    }
+    const accountList = apiAccount.filter(row => row.split('=')[0] === apiType)
+    const apiAccountKey = getConfigValue('apiAccountKey');
+    accountList.forEach(row => {
+        const group = row.split('=')
+        const account = group[1].split(',')
+        if(apiAccountKey && account.length === 3){
+            if(account[2] === apiAccountKey){
+                appid = account[0]
+                password = account[1]
+            }
+        }else{
+            appid = account[0]
+            password = account[1]
+        }
+    })
+    
+    
+    console.log('apiAccount', appid, password, accountList)
     return new Promise((resolve, reject) => {
-        if (['youdaoFree', 'bing'].includes(apiType)) {
-            // 必应接口
-            return freeApi.bingFreeApi({ text, from, to, appid, password }).then(res => {
-                const results = [{ dst: res }]
-                const params = { text, from, to, results: results || res }
-                resolve(params)
-            }).catch(error => {
-                reject(error)
-            })
-        } else if (apiType === 'googleFree') {
+        if (apiType === 'googleFree') {
             // 谷歌免费接口
             return freeApi.googleFreeApi({ text, from, to, appid, password }).then(res => {
                 let data = JSON.parse(res);
@@ -44,18 +63,31 @@ function getTranslate({ text, from, to }) {
                 showInformationMessage(res.message || JSON.stringify(res.response))
             })
         } else {
-            // 以下是注册接口，需要配置id和密钥
-            if (!appid || !password) {
-                return showInformationMessage('插件参数错误，没有配置appId和password', 100)
-            }
+            
             if (apiType === 'baidu') {
+                if (!appid || !password) {
+                    return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
+                }
                 // 百度注册接口
-                return baiduTranslateApi({ text, from, to, appid, password }).then(res => {
-                    let data = JSON.parse(res);
+                return baiduTranslateApi({ text, from, to, appid, password }).then(data => {
+                    // let data = JSON.parse(res);
                     let params = { text, from, to, results: data.trans_result || data }
                     resolve(params)
                 }).catch(res => {
                     showInformationMessage(res.message || JSON.stringify(res.response))
+                })
+            }
+            if (['bing'].includes(apiType)) {
+                if (!appid) {
+                    return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
+                }
+                // 必应接口
+                return freeApi.bingFreeApi({ text, from, to, appid, password }).then(res => {
+                    const results = [{ dst: res }]
+                    const params = { text, from, to, results: results || res }
+                    resolve(params)
+                }).catch(error => {
+                    reject(error)
                 })
             }
         }

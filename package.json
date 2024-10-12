@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.6.1",
+    "version": "1.7.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -125,10 +125,23 @@
                         "googleFree"
                     ],
                     "description": [
-                        "百度翻译API",
-                        "必应接口-无需配置账号/可配置自己的appid获得更好速度",
-                        "谷歌免费接口-无需配置账号"
+                        "百度翻译API-需要配置账号",
+                        "必应接口-需要配置appid，网上可搜索到免费的appid，有些账号需要国区用，有些账号需要VPN",
+                        "谷歌免费接口(VPN)-无需配置账号"
                     ]
+                },
+                "translateSpeaker.apiAccount": {
+                    "type": "array",
+                    "default": [
+                        "bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1"
+                    ],
+                    "scope": "scope",
+                    "description": "翻译API账号，格式：apiTyp=appid,password,多账号key（比如2）"
+                },
+                "translateSpeaker.apiAccountKey":{
+                    "type": "string",
+                    "default": "",
+                    "description": "如果同一个apiType有多个账号，可以在这里指定一个字符串，用来匹配translateSpeaker.apiAccount参数中的多账号key"
                 },
                 "translateSpeaker.appId": {
                     "type": "string",
@@ -157,9 +170,9 @@
     "dependencies": {
         "@types/mocha": "^2.2.42",
         "@types/node": "^7.0.43",
+        "axios": "^1.7.7",
         "eslint": "^4.11.0",
         "request": "^2.88.2",
-        "request-promise": "^4.2.6",
         "say": "^0.13.1",
         "typescript": "^2.6.1"
     }

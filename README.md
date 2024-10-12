@@ -3,6 +3,10 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
+2024-10-12 升级到 1.7.0 版本
+1. 添加了全新的账号参数`translateSpeaker.apiAccount`
+2. 可以同时添加不同apiType的账号，并可以为同一个apiType添加多个账号
+
 2023-11-02 升级到 1.6.1 版本
 1. 添加了 `SNAKE_CASE`=大写蛇形（下划线）
 
@@ -67,8 +71,25 @@
 |mode|string|manual|工作模式：manual=手动，autoEnglish=自动翻译英文，autoChinese=自动翻译中文，auto=自动中英文转换|
 |translateTimeout|number|15000|翻译结果在左下角状态栏显示多长时间（毫秒）|
 |wordMaxLength|number|34|超过这个长度的字符串不处理|
-|pickTypeAndSort|array|["coding","replace","append"]|配置拾取器排序
-|codingFormat|array|["auto","PascalCase","lowerCamelCase","snake_case","space","kebab-case"]|配置当pickTypeAndSort中包含有coding的时候的格式化拾取器排序
+|pickTypeAndSort|array|["coding","replace","append"]|配置拾取器排序|
+|codingFormat|array|["auto","PascalCase","lowerCamelCase","snake_case","space","kebab-case"]|配置当pickTypeAndSort中包含有coding的时候的格式化拾取器排序|
+|apiAccount|array|["bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1"]|多账号配置|
+
+### 多账号配置参数格式
+apiType=appId,password,key
+其中：apiType就是`apiType`参数的内容，appId和password就是该接口需要的配置
+`key`是如果存在多个账号切换，需要配置`apiAccountKey`和这个key对照。
+比如：
+```json
+{
+    "translateSpeaker.apiAccount":[
+        "bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1",
+        "bing=A4D660A48A6A97CCA791C34935E4C02BBB1BEC1C,,2",
+    ],
+    "translateSpeaker.apiAccountKey":"2"
+}
+```
+apiAccountKey="2"表示，当如果apiType切换到了bing，使用第2个appid作为配置（配置中最后一段的字符串）
 
 ### 百度翻译API配置
 如何获取百度翻译API的账号
