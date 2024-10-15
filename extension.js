@@ -20,37 +20,42 @@ function getTranslate({ text, from, to }) {
     let appid = getConfigValue('appId');
     let password = getConfigValue('password');
     const apiAccount = getConfigValue('apiAccount') || [];
-    if(appid){
-        console.log('还在使用旧账号配置', appid, password)
+    if (appid) {
+        // console.log('还在使用旧账号配置', appid, password)
         // 提示用户升级配置
-        // vscode.window.showInformationMessage('插件配置已经升级，请删除translateSpeaker.appId和translateSpeaker.password配置，使用apiAccount配置', { title: '查看文档', code:100 }).then(() => {
-        //     // 点击打开url；https://github.com/pcloth/translate-speaker
-        //     vscode.env.openExternal(vscode.Uri.parse('https://github.com/pcloth/translate-speaker'));
-        // })
+        vscode.window.showInformationMessage(
+            '插件配置已经升级，请删除translateSpeaker.appId和translateSpeaker.password配置，使用apiAccount配置', 
+            { title: '查看文档', code: 100 }
+        ).then((res) => {
+            if (res && res.code === 100) {
+                vscode.env.openExternal(vscode.Uri.parse('https://github.com/pcloth/translate-speaker'));
+            }
+        })
     }
     const accountList = apiAccount.filter(row => row.split('=')[0] === apiType)
     const apiAccountKey = getConfigValue('apiAccountKey');
     accountList.forEach(row => {
         const group = row.split('=')
         const account = group[1].split(',')
-        if(apiAccountKey && account.length === 3){
-            if(account[2] === apiAccountKey){
+        if (apiAccountKey && account.length === 3) {
+            if (account[2] === apiAccountKey) {
                 appid = account[0]
                 password = account[1]
             }
-        }else{
+        } else {
             appid = account[0]
             password = account[1]
         }
     })
-    
-    
-    console.log('apiAccount', appid, password, accountList)
+    if(!appid && apiType==='bing'){
+        // 内置一个外区免费appid（不保证长期可用）
+        appid = 'AFC76A66CF4F434ED080D245C30CF1E71C22959C'
+    }
+    // console.log('apiAccount', appid, password, accountList,apiType,apiAccountKey)
     return new Promise((resolve, reject) => {
         if (apiType === 'googleFree') {
             // 谷歌免费接口
-            return freeApi.googleFreeApi({ text, from, to, appid, password }).then(res => {
-                let data = JSON.parse(res);
+            return freeApi.googleFreeApi({ text, from, to, appid, password }).then(data => {
                 let results = []
                 data.sentences.forEach(row => {
                     results.push({
@@ -63,7 +68,7 @@ function getTranslate({ text, from, to }) {
                 showInformationMessage(res.message || JSON.stringify(res.response))
             })
         } else {
-            
+
             if (apiType === 'baidu') {
                 if (!appid || !password) {
                     return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
