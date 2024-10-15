@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 const vscode = require("vscode");
 const baiduTranslateApi = require('./lib/baiduapi.js');
+const tengxunTranslateApi = require('./lib/txApi.js');
 const freeApi = require('./lib/freeApi.js');
 const { e2var, typeMaps } = require('./lib/englishToVariable.js');
 const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText, longTextShowShort } = require('./lib/common.js');
@@ -68,7 +69,6 @@ function getTranslate({ text, from, to }) {
                 showInformationMessage(res.message || JSON.stringify(res.response))
             })
         } else {
-
             if (apiType === 'baidu') {
                 if (!appid || !password) {
                     return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
@@ -77,6 +77,22 @@ function getTranslate({ text, from, to }) {
                 return baiduTranslateApi({ text, from, to, appid, password }).then(data => {
                     // let data = JSON.parse(res);
                     let params = { text, from, to, results: data.trans_result || data }
+                    resolve(params)
+                }).catch(res => {
+                    showInformationMessage(res.message || JSON.stringify(res.response))
+                })
+            }
+            if (apiType === 'tencent') {
+                if (!appid || !password) {
+                    return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
+                }
+                if(appid.length!==36){
+                    return showInformationMessage('腾讯翻译接口appid错误，appid位置需要配置SecretId，请检查', 100)
+                }
+                // 腾讯接口
+                return tengxunTranslateApi({ text, from, to, appid, password }).then(data => {
+                    let results = [{dst: data}]
+                    let params = { text, from, to, results: results || data }
                     resolve(params)
                 }).catch(res => {
                     showInformationMessage(res.message || JSON.stringify(res.response))

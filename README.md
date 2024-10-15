@@ -65,7 +65,7 @@
 |---|---|---|---|
 |enable | boolean | true | 是否启用插件功能 |
 |enableSpeak | boolean | true | 是否启用语音朗读 |
-|apiType | string | 'bing'| 接口类型，目前支持：baidu=百度翻译api(需要账号)，bing=必应，googleFree=谷歌（需要VPN） |
+|apiType | string | 'bing'| 接口类型，目前支持：`baidu`=百度翻译api(需要账号)，`bing`=必应(可以添加账号)，`tencent`=腾讯(需要账号)，`googleFree`=谷歌（需要VPN） |
 |appId  | string | 无 | 翻译API的账号 |
 |password  | string | 无 | 翻译API的密钥 |
 |mode|string|manual|工作模式：manual=手动，autoEnglish=自动翻译英文，autoChinese=自动翻译中文，auto=自动中英文转换|
@@ -91,12 +91,15 @@ apiType=appId,password,key
 ```
 apiAccountKey="2"表示，当如果apiType切换到了bing，使用第2个appid作为配置（配置中最后一段的字符串）
 
-### 百度翻译API配置
-如何获取百度翻译API的账号
-https://blog.csdn.net/zhebushibiaoshifu/article/details/115682054
+### 目前支持的几种apiType
+|apiType|提供方|免费额度|官方文档|
+|---|---|---|---|
+|baidu|百度|标准版：每月5万字符（QPS=1），高级版：每月100万字符(QPS=10)，尊享版:每月200万字符(QPS=100)|https://api.fanyi.baidu.com/product/112|
+|tencent|腾讯|每月500万字符(QPS=5)|https://cloud.tencent.com/document/api/551/15619
+|bing|微软bing|内置了需要vpn的appid，你也可以自己申请（找一个）账号|V2版本已经绝版，且用且珍惜|
+|googleFree|谷歌|需要vpn||
 
-百度翻译接口文档
-https://api.fanyi.baidu.com/product/113
+
 
 
 
