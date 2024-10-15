@@ -138,7 +138,7 @@
                     "scope": "scope",
                     "description": "翻译API账号，格式：apiTyp=appid,password,多账号key（比如2）"
                 },
-                "translateSpeaker.apiAccountKey":{
+                "translateSpeaker.apiAccountKey": {
                     "type": "string",
                     "default": "",
                     "description": "如果同一个apiType有多个账号，可以在这里指定一个字符串，用来匹配translateSpeaker.apiAccount参数中的多账号key"
@@ -175,5 +175,8 @@
         "request": "^2.88.2",
         "say": "^0.13.1",
         "typescript": "^2.6.1"
+    },
+    "volta": {
+        "node": "20.17.0"
     }
 }
