@@ -1,7 +1,11 @@
 ## 更新日志：
 
+2024-10-16 升级到 1.7.3 版本
+1. 添加了pickerLabel的格式化参数`translateSpeaker.pickLabelFormat`
+2. 添加了picker描述字段是否显示参数`translateSpeaker.showPickDesc`
+
 2024-10-15 升级到 1.7.1 版本
-1、添加了腾讯翻译接口支持
+1. 添加了腾讯翻译接口支持
 
 2024-10-12 升级到 1.7.0 版本
 1. 添加了全新的账号参数`translateSpeaker.apiAccount`

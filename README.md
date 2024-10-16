@@ -3,6 +3,10 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
+2024-10-16 升级到 1.7.3 版本
+1. 添加了pickerLabel的格式化参数`translateSpeaker.pickLabelFormat`
+2. 添加了picker描述字段是否显示参数`translateSpeaker.showPickDesc`
+
 2024-10-12 升级到 1.7.0 版本
 1. 添加了全新的账号参数`translateSpeaker.apiAccount`
 2. 可以同时添加不同apiType的账号，并可以为同一个apiType添加多个账号
@@ -74,6 +78,8 @@
 |pickTypeAndSort|array|["coding","replace","append"]|配置拾取器排序|
 |codingFormat|array|["auto","PascalCase","lowerCamelCase","snake_case","space","kebab-case"]|配置当pickTypeAndSort中包含有coding的时候的格式化拾取器排序|
 |apiAccount|array|["bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1"]|多账号配置|
+|pickLabelFormat|string|`{num} [ {shortText} ] {midstr}{typeName} => [ {shortOutText} ]`|拾取器的显示格式|
+|showPickDesc|boolean|true|是否显示拾取器的描述|
 
 ### 多账号配置参数格式
 apiType=appId,password,key

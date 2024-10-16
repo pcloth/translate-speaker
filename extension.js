@@ -116,6 +116,59 @@ function getTranslate({ text, from, to }) {
     })
 }
 
+/** 
+ * 格式化pickerItem
+ */
+function formatPickerItem(options) {
+    let {
+        type,
+        typeName='',
+        text,
+        num,
+        shortText, 
+        shortDst,
+        dst,
+        description,
+        outText
+    } = options    
+    // label: `${num} [ ${shortText} ] 替换(${typeName}) => [ ${longTextShowShort(outText)} ]`,
+    let midstr = ''
+    if(['coding','replace'].includes(type)){
+        midstr='替换'
+    }else if(type==='append'){
+        midstr='追加'
+        outText = `${text} [ ${dst} ]`
+    }
+    if(typeName){
+        typeName =`(${typeName})`
+    }
+    const shortOutText = longTextShowShort(outText)
+    const pickLabelFormat = getConfigValue('pickLabelFormat')
+    let label = `${num} [ ${shortText} ] ${midstr}${typeName} => [ ${shortOutText} ]`
+    if(pickLabelFormat){
+        // 正则获取变量名称
+        const reg = /\{(.*?)\}/g
+        const arr = pickLabelFormat.match(reg)
+        arr.forEach(row=>{
+            const key = row.replace('{','').replace('}','')
+            const value = options[key] || ''
+            label = label.replace(row,value)
+        })
+    }
+    const showPickDesc = getConfigValue('showPickDesc')
+    if(!showPickDesc){
+        description = ''
+    }
+    
+    return {
+        original: text,
+        label: label,
+        description: description,
+        dst: dst,
+        outText: outText,
+    }
+}
+
 // coding模式处理翻译结果
 function translateResultsCodingMode({ text, from, to, results }, options = { replace: true, append: true }) {
     if (results) {
@@ -152,37 +205,71 @@ function translateResultsCodingMode({ text, from, to, results }, options = { rep
                             outText = e2var(dst, '', fmType);
                             description = `替换选中字符串为（${typeName}）格式化后的字符串`
                         }
-                        items.push({
-                            original: text,
-                            label: `${num} [ ${shortText} ] 替换(${typeName}) => [ ${longTextShowShort(outText)} ]`,
-                            description: description,
-                            dst: dst,
-                            outText: outText,
-                        });
+                        items.push(formatPickerItem({
+                            type,
+                            typeName,
+                            text,
+                            num,
+                            shortText,
+                            shortDst,
+                            dst,
+                            description,
+                            outText
+                        }))
+                        // items.push({
+                        //     original: text,
+                        //     label: `${num} [ ${shortText} ] 替换(${typeName}) => [ ${longTextShowShort(outText)} ]`,
+                        //     description: description,
+                        //     dst: dst,
+                        //     outText: outText,
+                        // });
                         num += 1
                     })
                 }
                 // 原文替换
                 if (type === 'replace' && options.replace) {
-                    items.push({
-                        original: text,
-                        label: `${num} [ ${shortText} ] 替换 => [ ${shortDst} ]`,
+                    items.push(formatPickerItem({
+                        type,
+                        typeName:'',
+                        text,
+                        num,
+                        shortText,
+                        shortDst,
+                        dst,
                         description: `替换选中字符串`,
-                        dst: dst,
-                        outText: dst,
-                    });
+                        outText
+                    }))
+
+                    // items.push({
+                    //     original: text,
+                    //     label: `${num} [ ${shortText} ] 替换 => [ ${shortDst} ]`,
+                    //     description: `替换选中字符串`,
+                    //     dst: dst,
+                    //     outText: dst,
+                    // });
                     num += 1
                 }
 
                 // 原文追加
                 if (type === 'append' && options.append) {
-                    items.push({
-                        original: text,
-                        label: `${num} [ ${shortText} ] 追加 => [ ${shortDst} ]`,
+                    items.push(formatPickerItem({
+                        type,
+                        typeName:'',
+                        text,
+                        num,
+                        shortText,
+                        shortDst,
+                        dst,
                         description: `保留原文并在后方[]中加入翻译`,
-                        dst: dst,
-                        outText: `${text} [ ${dst} ]`,
-                    });
+                        outText
+                    }))
+                    // items.push({
+                    //     original: text,
+                    //     label: `${num} [ ${shortText} ] 追加 => [ ${shortDst} ]`,
+                    //     description: `保留原文并在后方[]中加入翻译`,
+                    //     dst: dst,
+                    //     outText: `${text} [ ${dst} ]`,
+                    // });
                     num += 1
                 }
             })
