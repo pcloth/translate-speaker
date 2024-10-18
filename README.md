@@ -82,19 +82,24 @@
 |showPickDesc|boolean|true|是否显示拾取器的描述|
 
 ### 多账号配置参数格式
-apiType=appId,password,key
+
+`apiType=appId,password,key`
+
 其中：apiType就是`apiType`参数的内容，appId和password就是该接口需要的配置
 `key`是如果存在多个账号切换，需要配置`apiAccountKey`和这个key对照。
 比如：
 ```json
 {
     "translateSpeaker.apiAccount":[
+        "baidu=你的appid,你的password,",
+        "tencent=你的SecretId,你的SecretKey,",
         "bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1",
         "bing=A4D660A48A6A97CCA791C34935E4C02BBB1BEC1C,,2",
     ],
     "translateSpeaker.apiAccountKey":"2"
 }
 ```
+
 apiAccountKey="2"表示，当如果apiType切换到了bing，使用第2个appid作为配置（配置中最后一段的字符串）
 
 ### 目前支持的几种apiType
