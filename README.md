@@ -65,7 +65,7 @@
 
 ## 配置
 
-|参数名字|类型|默认值|说明|
+|参数名字|类型|默认值|<div style="min-width:300px;">说明</div>|
 |---|---|---|---|
 |enable | boolean | true | 是否启用插件功能 |
 |enableSpeak | boolean | true | 是否启用语音朗读 |
