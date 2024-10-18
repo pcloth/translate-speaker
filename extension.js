@@ -124,14 +124,10 @@ function formatPickerItem(options) {
         type,
         typeName='',
         text,
-        num,
-        shortText, 
-        shortDst,
         dst,
         description,
         outText
     } = options    
-    // label: `${num} [ ${shortText} ] 替换(${typeName}) => [ ${longTextShowShort(outText)} ]`,
     let midstr = ''
     if(['coding','replace'].includes(type)){
         midstr='替换'
@@ -142,10 +138,15 @@ function formatPickerItem(options) {
     if(typeName){
         typeName =`(${typeName})`
     }
-    const shortOutText = longTextShowShort(outText)
-    const pickLabelFormat = getConfigValue('pickLabelFormat')
-    let label = `${num} [ ${shortText} ] ${midstr}${typeName} => [ ${shortOutText} ]`
+    options.shortOutText = longTextShowShort(outText)
+    options.midstr = midstr
+    options.typeName = typeName
+    options.outText = outText
+    const pickLabelFormat = getConfigValue('pickLabelFormat')||'{num} [ {shortText} ] {midstr}{typeName} => [ {shortOutText} ]'
+    let label = ''
+    // console.log(pickLabelFormat,'pickLabelFormat')
     if(pickLabelFormat){
+        label = pickLabelFormat
         // 正则获取变量名称
         const reg = /\{(.*?)\}/g
         const arr = pickLabelFormat.match(reg)
