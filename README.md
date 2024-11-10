@@ -5,6 +5,7 @@
 ## 更新说明
 2024-11-10 升级到 1.7.5 版本
 1. 修复一些bug
+2. 添加了`englishNotCodingMode`参数，用于非coding状态的英文翻译，不预处理英文结构。
 
 2024-10-16 升级到 1.7.3 版本
 1. 添加了pickerLabel的格式化参数`translateSpeaker.pickLabelFormat`
@@ -83,6 +84,7 @@
 |apiAccount|array|["bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1"]|多账号配置|
 |pickLabelFormat|string|`{num} [ {shortText} ] {midstr}{typeName} => [ {shortOutText} ]`|拾取器的显示格式|
 |showPickDesc|boolean|true|是否显示拾取器的描述|
+|englishNotCodingMode|boolean|false|用于非coding状态的英文翻译，不预处理英文结构。|
 
 ### 多账号配置参数格式
 

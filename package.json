@@ -77,6 +77,11 @@
                         "自动翻译模式：选中内容后，自动翻译（翻译结果只显示在左下角，点击后弹出拾取菜单）"
                     ]
                 },
+                "translateSpeaker.englishNotCodingMode": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "英文不转换成变量模式"
+                },
                 "translateSpeaker.pickTypeAndSort": {
                     "type": "array",
                     "default": [

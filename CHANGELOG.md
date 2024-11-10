@@ -2,6 +2,7 @@
 
 2024-11-10 升级到 1.7.5 版本
 1. 修复一些bug
+2. 添加了`englishNotCodingMode`参数，用于非coding状态的英文翻译，不预处理英文结构。
 
 2024-10-16 升级到 1.7.3 版本
 1. 添加了pickerLabel的格式化参数`translateSpeaker.pickLabelFormat`
