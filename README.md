@@ -3,6 +3,9 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
+2024-11-10 升级到 1.7.5 版本
+1. 修复一些bug
+
 2024-10-16 升级到 1.7.3 版本
 1. 添加了pickerLabel的格式化参数`translateSpeaker.pickLabelFormat`
 2. 添加了picker描述字段是否显示参数`translateSpeaker.showPickDesc`

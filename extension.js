@@ -29,6 +29,7 @@ function getTranslate({ text, from, to }) {
             { title: '查看文档', code: 100 }
         ).then((res) => {
             if (res && res.code === 100) {
+                // @ts-ignore
                 vscode.env.openExternal(vscode.Uri.parse('https://github.com/pcloth/translate-speaker'));
             }
         })
@@ -63,7 +64,7 @@ function getTranslate({ text, from, to }) {
                         dst: row.trans
                     })
                 })
-                let params = { text, from, to, results: results || res }
+                let params = { text, from, to, results: results || data }
                 resolve(params)
             }).catch(res => {
                 showInformationMessage(res.message || JSON.stringify(res.response))
@@ -175,7 +176,9 @@ function translateResultsCodingMode({ text, from, to, results }, options = { rep
     if (results) {
         let items = [];
         let num = 1;
+        // console.log('text 0', text)
         text = decodeURIComponent(text)
+        // console.log('text 1', text)
         const shortText = longTextShowShort(text, 5)
         const pickTypeAndSort = getConfigValue('pickTypeAndSort') || [];
         if (!pickTypeAndSort.length) {
@@ -339,9 +342,9 @@ class WordVoice {
             to = 'en'
         }
         getTranslate({ text, from, to }).then(res => {
-            let { text, from, to, results } = res
+            let { results } = res
             let outDst = ''
-            results.forEach((item, index) => {
+            results.forEach((item) => {
                 let dst = decodeURIComponent(item.dst);
                 outDst = dst;
             })
