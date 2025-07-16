@@ -6,6 +6,7 @@ const vscode = require("vscode");
 const baiduTranslateApi = require('./lib/baiduapi.js');
 const tengxunTranslateApi = require('./lib/txApi.js');
 const freeApi = require('./lib/freeApi.js');
+const LLM = require('./lib/aiApi.js');
 const { e2var, typeMaps } = require('./lib/englishToVariable.js');
 const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText, longTextShowShort } = require('./lib/common.js');
 
@@ -53,7 +54,7 @@ function getTranslate({ text, from, to }) {
         // 内置一个外区免费appid（不保证长期可用）
         appid = 'AFC76A66CF4F434ED080D245C30CF1E71C22959C'
     }
-    // console.log('apiAccount', appid, password, accountList,apiType,apiAccountKey)
+    // console.log('!!!!apiAccount', appid, password, accountList,apiType,apiAccountKey)
     return new Promise((resolve, reject) => {
         if (apiType === 'googleFree') {
             // 谷歌免费接口
@@ -69,8 +70,7 @@ function getTranslate({ text, from, to }) {
             }).catch(res => {
                 showInformationMessage(res.message || JSON.stringify(res.response))
             })
-        } else {
-            if (apiType === 'baidu') {
+        } else if (apiType === 'baidu') {
                 if (!appid || !password) {
                     return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
                 }
@@ -82,8 +82,7 @@ function getTranslate({ text, from, to }) {
                 }).catch(res => {
                     showInformationMessage(res.message || JSON.stringify(res.response))
                 })
-            }
-            if (apiType === 'tencent') {
+            } else if (apiType === 'tencent') {
                 if (!appid || !password) {
                     return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
                 }
@@ -98,8 +97,7 @@ function getTranslate({ text, from, to }) {
                 }).catch(res => {
                     showInformationMessage(res.message || JSON.stringify(res.response))
                 })
-            }
-            if (['bing'].includes(apiType)) {
+            } else if (['bing'].includes(apiType)) {
                 if (!appid) {
                     return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
                 }
@@ -111,8 +109,19 @@ function getTranslate({ text, from, to }) {
                 }).catch(error => {
                     reject(error)
                 })
+            } else if (apiType === 'LLM') {
+                // 本地AI模型接口
+                return LLM.translateWithLLM({ text, from, to, appid, password }).then(data => {
+                    // console.log('LLM data', text, data)
+                    if(!data || !data.length){
+                        return showInformationMessage('本地AI模型没有返回翻译结果，请检查配置', 101)
+                    }
+                    let params = { text, from, to, results: data }
+                    resolve(params)
+                }).catch(res => {
+                    showInformationMessage(res.message || JSON.stringify(res.response))
+                })
             }
-        }
 
     })
 }

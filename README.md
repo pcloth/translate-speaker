@@ -3,31 +3,34 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
-2024-11-10 升级到 1.7.5 版本
+2025-07-16 升级到 `1.8.0` 版本
+1. 支持了Ai翻译，可以调用兼容openai的LLM模型进行翻译
+
+2024-11-10 升级到 `1.7.5` 版本
 1. 修复一些bug
 2. 添加了`englishNotCodingMode`参数，用于非coding状态的英文翻译，不预处理英文结构。
 
-2024-10-16 升级到 1.7.3 版本
+2024-10-16 升级到 `1.7.3` 版本
 1. 添加了pickerLabel的格式化参数`translateSpeaker.pickLabelFormat`
 2. 添加了picker描述字段是否显示参数`translateSpeaker.showPickDesc`
 
-2024-10-12 升级到 1.7.0 版本
+2024-10-12 升级到 `1.7.0` 版本
 1. 添加了全新的账号参数`translateSpeaker.apiAccount`
 2. 可以同时添加不同apiType的账号，并可以为同一个apiType添加多个账号
 
-2023-11-02 升级到 1.6.1 版本
+2023-11-02 升级到 `1.6.1` 版本
 1. 添加了 `SNAKE_CASE`=大写蛇形（下划线）
 
-2023-09-16 升级到 1.6.0 版本
+2023-09-16 升级到 `1.6.0` 版本
 1. 添加了`转换变量格式并朗读`菜单功能，当你选中一个变量名的时候，会根据
 `codingFormat`参数转换变量格式
 
-2023-09-06 升级到 1.5.2 版本
+2023-09-06 升级到 `1.5.2` 版本
 1. 移除youdaoFree接口
 2. 添加bing接口，并设置为了默认
 
 
-2023-08-23 更新到 1.5.1
+2023-08-23 更新到 `1.5.1`
 
 1. 添加了`codingFormat`参数，当`pickTypeAndSort`参数中有`coding`的时候生效，将在coding的模式下对字符串进行格式化，如果全部清空将使用`auto`
 转换成变量模式的格式：
@@ -47,7 +50,7 @@
 2023-04-15 
 1. 更新文档
 
-2023-02-23 更新到 1.5.0
+2023-02-23 更新到 `1.5.0`
 
 1. 添加`pickTypeAndSort`参数，配置拾取器和排序，默认排序和内容如下：
 
@@ -100,6 +103,7 @@
         "tencent=你的SecretId,你的SecretKey,",
         "bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1",
         "bing=A4D660A48A6A97CCA791C34935E4C02BBB1BEC1C,,2",
+        "LLM=gemma-2-9b-it@http://127.0.0.1:1234,yourtoken,localLLM"
     ],
     "translateSpeaker.apiAccountKey":"2"
 }
@@ -114,6 +118,7 @@ apiAccountKey="2"表示，当如果apiType切换到了bing，使用第2个appid�
 |tencent|腾讯|每月500万字符(QPS=5)|https://cloud.tencent.com/document/api/551/15619
 |bing|微软bing|内置了需要vpn的appid，你也可以自己申请（找一个）账号|V2版本已经绝版，且用且珍惜|
 |googleFree|谷歌|需要vpn||
+|LLM|兼容openAi的LLM模型翻译接口|-|自己搭配AI接口，例如LLM=gemma-2-9b-it@http://127.0.0.1:1234,,localLLM|
 
 
 

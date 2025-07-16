@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.7.5",
+    "version": "1.8.0",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -138,12 +138,14 @@
                         "baidu",
                         "bing",
                         "tencent",
-                        "googleFree"
+                        "googleFree",
+                        "LLM"
                     ],
                     "description": [
                         "百度翻译API-需要配置账号",
                         "必应接口-需要配置appid，网上可搜索到免费的appid，有些账号需要国区用，有些账号需要VPN",
-                        "谷歌免费接口(VPN)-无需配置账号"
+                        "谷歌免费接口(VPN)-无需配置账号",
+                        "LLM-本地AI接口，apiAccount格式：modelName@host:port,例如 gemma-2-9b-it@http://localhost:1234"
                     ]
                 },
                 "translateSpeaker.apiAccount": {
