@@ -3,8 +3,10 @@
 这是一个vscode插件，功能是翻译和朗读，并可以快速的替换翻译内容；
 
 ## 更新说明
-2025-07-16 升级到 `1.8.0` 版本
+2025-07-16 升级到 `1.8.1` 版本
 1. 支持了Ai翻译，可以调用兼容openai的LLM模型进行翻译
+2. 添加了`tipsOnce`参数，默认有些提示只显示一次。
+3. 优化了账号选择逻辑，当指定`apiAccountKey`的时候，以apiAccountKey标记的账号为准。如果指定了`apiType`，就尝试从相同apiType中选择第一个，如果什么都没指定，就从apiAccount列表取第一个
 
 2024-11-10 升级到 `1.7.5` 版本
 1. 修复一些bug
@@ -88,17 +90,24 @@
 |pickLabelFormat|string|`{num} [ {shortText} ] {midstr}{typeName} => [ {shortOutText} ]`|拾取器的显示格式|
 |showPickDesc|boolean|true|是否显示拾取器的描述|
 |englishNotCodingMode|boolean|false|用于非coding状态的英文翻译，不预处理英文结构。|
+|tipsOnce|boolean|true|有些提示，只显示一次，如果设置了`false`，就会每次都提示。|
 
 ### 多账号配置参数格式
 
+参数格式：
 `apiType=appId,password,key`
+
 
 其中：apiType就是`apiType`参数的内容，appId和password就是该接口需要的配置
 `key`是如果存在多个账号切换，需要配置`apiAccountKey`和这个key对照。
+
+当指定`apiAccountKey`的时候，以apiAccountKey标记的账号为准。如果指定了`apiType`，就尝试从相同apiType中选择第一个，如果什么都没指定，就从apiAccount列表取第一个
+
 比如：
 ```json
 {
     "translateSpeaker.apiAccount":[
+        "apiType=appid,password,apiAccountKey",
         "baidu=你的appid,你的password,",
         "tencent=你的SecretId,你的SecretKey,",
         "bing=AFC76A66CF4F434ED080D245C30CF1E71C22959C,,1",

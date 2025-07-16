@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {
@@ -77,6 +77,11 @@
                         "自动翻译模式：选中内容后，自动翻译（翻译结果只显示在左下角，点击后弹出拾取菜单）"
                     ]
                 },
+                "translateSpeaker.tipsOnce":{
+                    "type": "boolean",
+                    "default": true,
+                    "description": "有些提示只显示一次，默认开启。关闭后将会一直提示。"
+                },
                 "translateSpeaker.englishNotCodingMode": {
                     "type": "boolean",
                     "default": false,
@@ -133,7 +138,6 @@
                 },
                 "translateSpeaker.apiType": {
                     "type": "string",
-                    "default": "bing",
                     "enum": [
                         "baidu",
                         "bing",

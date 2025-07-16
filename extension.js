@@ -8,7 +8,7 @@ const tengxunTranslateApi = require('./lib/txApi.js');
 const freeApi = require('./lib/freeApi.js');
 const LLM = require('./lib/aiApi.js');
 const { e2var, typeMaps } = require('./lib/englishToVariable.js');
-const { getConfigValue, isChinese, showInformationMessage, speakText, englishClearSelectionText, longTextShowShort } = require('./lib/common.js');
+const { getConfigValue, isChinese, showInformationMessage, clearTip, showInformationMessageOnce, speakText, englishClearSelectionText, longTextShowShort, setGlobalContext, shouldShowTip, markTipAsShown, clearAllTips } = require('./lib/common.js');
 
 let $event = {
     fileExtension: '', // 文件后缀，用来确定输出英文格式
@@ -23,38 +23,62 @@ function getTranslate({ text, from, to }) {
     let password = getConfigValue('password');
     const apiAccount = getConfigValue('apiAccount') || [];
     if (appid) {
-        // console.log('还在使用旧账号配置', appid, password)
-        // 提示用户升级配置
-        vscode.window.showInformationMessage(
-            '插件配置已经升级，请删除translateSpeaker.appId和translateSpeaker.password配置，使用apiAccount配置', 
-            { title: '查看文档', code: 100 }
+        showInformationMessage(
+            '插件配置已经升级，请删除translateSpeaker.appId和translateSpeaker.password配置，使用apiAccount配置',
+            100,
+            '查看文档'
         ).then((res) => {
             if (res && res.code === 100) {
                 // @ts-ignore
                 vscode.env.openExternal(vscode.Uri.parse('https://github.com/pcloth/translate-speaker'));
             }
-        })
+        });
     }
-    const accountList = apiAccount.filter(row => row.split('=')[0] === apiType)
     const apiAccountKey = getConfigValue('apiAccountKey');
-    accountList.forEach(row => {
+    for (const row of apiAccount) {
         const group = row.split('=')
+        if (group.length < 2) {
+            continue
+        }
         const account = group[1].split(',')
         if (apiAccountKey && account.length === 3) {
+            // 如果配置了apiAccountKey，且账号长度为3，则使用第三个参数作为key
+            // 直接使用当前配置
             if (account[2] === apiAccountKey) {
+                apiType = group[0]
                 appid = account[0]
                 password = account[1]
+                break
             }
-        } else {
+        }
+        if (apiType && apiType === group[0]) {
+            appid = account[0]
+            if (account.length >= 2) {
+                password = account[1]
+            } else {
+                password = ''
+            }
+            break
+        }
+        if (!apiType && !apiAccountKey) {
+            // 如果没有配置apiType和apiAccountKey，则使用第一个账号
+            apiType = group[0]
             appid = account[0]
             password = account[1]
+            break
         }
-    })
-    if(!appid && apiType==='bing'){
-        // 内置一个外区免费appid（不保证长期可用）
-        appid = 'AFC76A66CF4F434ED080D245C30CF1E71C22959C'
     }
-    // console.log('!!!!apiAccount', appid, password, accountList,apiType,apiAccountKey)
+
+    // 账号都循环完了，还没找到，就直接配置一个默认账号
+    if (!appid) {
+        // 内置一个外区免费appid（不保证长期可用）
+        apiType = 'bing'
+        appid = 'AFC76A66CF4F434ED080D245C30CF1E71C22959C'
+        showInformationMessageOnce('没有配置apiAccount，使用内置的bing外区免费账号，请注意可能会失效', 'defaultBingAccount', 100)
+    }
+
+
+    console.log('当前使用账号', appid, password, apiType, apiAccountKey)
     return new Promise((resolve, reject) => {
         if (apiType === 'googleFree') {
             // 谷歌免费接口
@@ -71,57 +95,58 @@ function getTranslate({ text, from, to }) {
                 showInformationMessage(res.message || JSON.stringify(res.response))
             })
         } else if (apiType === 'baidu') {
-                if (!appid || !password) {
-                    return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
-                }
-                // 百度注册接口
-                return baiduTranslateApi({ text, from, to, appid, password }).then(data => {
-                    // let data = JSON.parse(res);
-                    let params = { text, from, to, results: data.trans_result || data }
-                    resolve(params)
-                }).catch(res => {
-                    showInformationMessage(res.message || JSON.stringify(res.response))
-                })
-            } else if (apiType === 'tencent') {
-                if (!appid || !password) {
-                    return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
-                }
-                if(appid.length!==36){
-                    return showInformationMessage('腾讯翻译接口appid错误，appid位置需要配置SecretId，请检查', 100)
-                }
-                // 腾讯接口
-                return tengxunTranslateApi({ text, from, to, appid, password }).then(data => {
-                    let results = [{dst: data}]
-                    let params = { text, from, to, results: results || data }
-                    resolve(params)
-                }).catch(res => {
-                    showInformationMessage(res.message || JSON.stringify(res.response))
-                })
-            } else if (['bing'].includes(apiType)) {
-                if (!appid) {
-                    return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
-                }
-                // 必应接口
-                return freeApi.bingFreeApi({ text, from, to, appid, password }).then(res => {
-                    const results = [{ dst: res }]
-                    const params = { text, from, to, results: results || res }
-                    resolve(params)
-                }).catch(error => {
-                    reject(error)
-                })
-            } else if (apiType === 'LLM') {
-                // 本地AI模型接口
-                return LLM.translateWithLLM({ text, from, to, appid, password }).then(data => {
-                    // console.log('LLM data', text, data)
-                    if(!data || !data.length){
-                        return showInformationMessage('本地AI模型没有返回翻译结果，请检查配置', 101)
-                    }
-                    let params = { text, from, to, results: data }
-                    resolve(params)
-                }).catch(res => {
-                    showInformationMessage(res.message || JSON.stringify(res.response))
-                })
+            if (!appid || !password) {
+                return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
             }
+            // 百度注册接口
+            return baiduTranslateApi({ text, from, to, appid, password }).then(data => {
+                // let data = JSON.parse(res);
+                console.log('百度翻译结果', data)
+                let params = { text, from, to, results: data.trans_result || data }
+                resolve(params)
+            }).catch(res => {
+                showInformationMessage(res.message || JSON.stringify(res.response))
+            })
+        } else if (apiType === 'tencent') {
+            if (!appid || !password) {
+                return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
+            }
+            if (appid.length !== 36) {
+                return showInformationMessage('腾讯翻译接口appid错误，appid位置需要配置SecretId，请检查', 100)
+            }
+            // 腾讯接口
+            return tengxunTranslateApi({ text, from, to, appid, password }).then(data => {
+                let results = [{ dst: data }]
+                let params = { text, from, to, results: results || data }
+                resolve(params)
+            }).catch(res => {
+                showInformationMessage(res.message || JSON.stringify(res.response))
+            })
+        } else if (['bing'].includes(apiType)) {
+            if (!appid) {
+                return showInformationMessage('插件参数错误，没有配置apiAccount', 100)
+            }
+            // 必应接口
+            return freeApi.bingFreeApi({ text, from, to, appid, password }).then(res => {
+                const results = [{ dst: res }]
+                const params = { text, from, to, results: results || res }
+                resolve(params)
+            }).catch(error => {
+                reject(error)
+            })
+        } else if (apiType === 'LLM') {
+            // 本地AI模型接口
+            return LLM.translateWithLLM({ text, from, to, appid, password }).then(data => {
+                // console.log('LLM data', text, data)
+                if (!data || !data.length) {
+                    return showInformationMessage('本地AI模型没有返回翻译结果，请检查配置', 101)
+                }
+                let params = { text, from, to, results: data }
+                resolve(params)
+            }).catch(res => {
+                showInformationMessage(res.message || JSON.stringify(res.response))
+            })
+        }
 
     })
 }
@@ -132,45 +157,45 @@ function getTranslate({ text, from, to }) {
 function formatPickerItem(options) {
     let {
         type,
-        typeName='',
+        typeName = '',
         text,
         dst,
         description,
         outText
-    } = options    
+    } = options
     let midstr = ''
-    if(['coding','replace'].includes(type)){
-        midstr='替换'
-    }else if(type==='append'){
-        midstr='追加'
+    if (['coding', 'replace'].includes(type)) {
+        midstr = '替换'
+    } else if (type === 'append') {
+        midstr = '追加'
         outText = `${text} [ ${dst} ]`
     }
-    if(typeName){
-        typeName =`(${typeName})`
+    if (typeName) {
+        typeName = `(${typeName})`
     }
     options.shortOutText = longTextShowShort(outText)
     options.midstr = midstr
     options.typeName = typeName
     options.outText = outText
-    const pickLabelFormat = getConfigValue('pickLabelFormat')||'{num} [ {shortText} ] {midstr}{typeName} => [ {shortOutText} ]'
+    const pickLabelFormat = getConfigValue('pickLabelFormat') || '{num} [ {shortText} ] {midstr}{typeName} => [ {shortOutText} ]'
     let label = ''
     // console.log(pickLabelFormat,'pickLabelFormat')
-    if(pickLabelFormat){
+    if (pickLabelFormat) {
         label = pickLabelFormat
         // 正则获取变量名称
         const reg = /\{(.*?)\}/g
         const arr = pickLabelFormat.match(reg)
-        arr.forEach(row=>{
-            const key = row.replace('{','').replace('}','')
+        arr.forEach(row => {
+            const key = row.replace('{', '').replace('}', '')
             const value = options[key] || ''
-            label = label.replace(row,value)
+            label = label.replace(row, value)
         })
     }
     const showPickDesc = getConfigValue('showPickDesc')
-    if(!showPickDesc){
+    if (!showPickDesc) {
         description = ''
     }
-    
+
     return {
         original: text,
         label: label,
@@ -243,7 +268,7 @@ function translateResultsCodingMode({ text, from, to, results }, options = { rep
                 if (type === 'replace' && options.replace) {
                     items.push(formatPickerItem({
                         type,
-                        typeName:'',
+                        typeName: '',
                         text,
                         num,
                         shortText,
@@ -267,7 +292,7 @@ function translateResultsCodingMode({ text, from, to, results }, options = { rep
                 if (type === 'append' && options.append) {
                     items.push(formatPickerItem({
                         type,
-                        typeName:'',
+                        typeName: '',
                         text,
                         num,
                         shortText,
@@ -290,7 +315,7 @@ function translateResultsCodingMode({ text, from, to, results }, options = { rep
         // 点击了快速选择框
         vscode.window.showQuickPick(items).then(selection => {
             if (!selection) {
-                showInformationMessage('请选中一个项目')
+                showInformationMessageOnce('请选中一个项目', 'tipsPick', 102);
                 return;
             }
             let editor = vscode.window.activeTextEditor;
@@ -328,6 +353,10 @@ class WordVoice {
             {
                 command: "extension.convertVariableFormat",
                 handler: 'startConvertVariableFormat',
+            },
+            {
+                command: "extension.clearTipsCache",
+                handler: 'clearTipsCacheHandler',
             }
         ]
         if (!this._statusBarItem) {
@@ -436,6 +465,12 @@ class WordVoice {
         }
     }
 
+    // 清除提示缓存（用于测试）
+    clearTipsCacheHandler() {
+        clearAllTips();
+        showInformationMessage('已清除所有提示缓存', 100);
+    }
+
     _convertVariablesToWords(text) {
         // 判断命名格式
         if (/^[a-z][a-zA-Z0-9]*$/.test(text)) {
@@ -536,6 +571,8 @@ class WordVoiceController {
 
 // 激活扩展
 function activate(context) {
+    // 初始化全局上下文
+    setGlobalContext(context);
 
     let wordVoice = new WordVoice(context);
     let controller = new WordVoiceController(wordVoice);
