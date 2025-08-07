@@ -2,7 +2,7 @@
     "name": "translate-speaker",
     "displayName": "translate speaker 翻译朗读者API",
     "description": "这是一个非常简单好用的翻译-朗读-替换/追加翻译一体化插件，你只需要配置一个接口参数即可。",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "publisher": "pcloth",
     "icon": "assert/logo.png",
     "engines": {

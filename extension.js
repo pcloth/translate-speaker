@@ -103,6 +103,7 @@ function getTranslate({ text, from, to }) {
                 // let data = JSON.parse(res);
                 console.log('百度翻译结果', data)
                 let params = { text, from, to, results: data.trans_result || data }
+                console.log('百度翻译结果', params)
                 resolve(params)
             }).catch(res => {
                 showInformationMessage(res.message || JSON.stringify(res.response))
